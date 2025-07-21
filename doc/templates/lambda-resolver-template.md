@@ -49,6 +49,7 @@ project/
 > 🔧 **アーキテクチャ改善**: AppSyncリゾルバーと実際のLambda関数を分離し、
 > それぞれの責任を明確化。メンテナンス性とテスト性が大幅に向上。
 
+```
 // 外部サービスクライアント（例：Comprehend）
 const comprehend = new AWS.Comprehend({
   region: process.env.AWS_REGION
