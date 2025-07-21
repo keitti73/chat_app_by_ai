@@ -40,37 +40,92 @@
 
 ```mermaid
 architecture-beta
-    group frontend(computer)[Frontend Layer]
-    group aws(cloud)[AWS Cloud Services]
-    group data(database)[Data Layer]
-    group auth(shield)[Authentication]
-    group infra(server)[Infrastructure]
+    group client(internet)[Client Tier]
+    group presentation(server)[Presentation Tier] 
+    group application(cloud)[Application Tier]
+    group authentication(cloud)[Authentication Tier]
+    group persistence(database)[Persistence Tier]
+    group infrastructure(server)[Infrastructure Tier]
 
-    service react(internet)[React App] in frontend
-    service amplify(server)[AWS Amplify] in frontend
+    service browser(internet)[Web Browser] in client
+    service reactApp(internet)[React SPA] in presentation
+    service vite(server)[Vite Dev Server] in presentation
+    service amplify(server)[AWS Amplify Client] in presentation
     
-    service appsync(api)[AppSync GraphQL API] in aws
-    service cognito(users)[Cognito User Pool] in auth
-    service identity(key)[Cognito Identity Pool] in auth
+    service appsync(cloud)[AppSync GraphQL API] in application
+    service pipelineResolvers(server)[Pipeline Resolvers] in application
+    service jsResolvers(server)[JavaScript Resolvers] in application
     
-    service dynamodb_rooms(database)[DynamoDB Rooms] in data
-    service dynamodb_messages(database)[DynamoDB Messages] in data
+    service cognitoUserPool(cloud)[Cognito User Pool] in authentication
+    service cognitoIdentity(cloud)[Cognito Identity Pool] in authentication
+    service jwtTokens(server)[JWT Tokens] in authentication
     
-    service terraform(server)[Terraform] in infra
-    service cloudwatch(monitor)[CloudWatch] in infra
+    service dynamoRooms(database)[DynamoDB Room Table] in persistence
+    service dynamoMessages(database)[DynamoDB Message Table] in persistence
+    service gsiOwner(disk)[Owner Index] in persistence
+    service gsiUser(disk)[User Activity Index] in persistence
+    service gsiRoom(disk)[Room Message Index] in persistence
+    
+    service terraform(server)[Terraform] in infrastructure
+    service cloudwatch(server)[CloudWatch] in infrastructure
+    service iamRoles(server)[IAM Roles] in infrastructure
 
-    react:R --> L:amplify
+    browser:R --> L:reactApp
+    reactApp:R --> L:amplify
+    reactApp:B --> T:vite
     amplify:R --> L:appsync
-    appsync:B --> T:cognito
-    appsync:B --> T:identity
-    appsync:R --> L:dynamodb_rooms
-    appsync:R --> L:dynamodb_messages
+    appsync:B --> T:cognitoUserPool
+    appsync:B --> T:cognitoIdentity
+    cognitoUserPool:R --> L:jwtTokens
+    appsync:R --> L:pipelineResolvers
+    appsync:R --> L:jsResolvers
+    pipelineResolvers:B --> T:dynamoRooms
+    pipelineResolvers:B --> T:dynamoMessages
+    jsResolvers:B --> T:dynamoRooms
+    jsResolvers:B --> T:dynamoMessages
+    dynamoRooms:R --> L:gsiOwner
+    dynamoMessages:R --> L:gsiUser
+    dynamoMessages:R --> L:gsiRoom
     terraform:T --> B:appsync
-    terraform:R --> L:dynamodb_rooms
-    terraform:R --> L:dynamodb_messages
-    terraform:T --> B:cognito
+    terraform:T --> B:dynamoRooms
+    terraform:T --> B:dynamoMessages
+    terraform:T --> B:cognitoUserPool
+    terraform:T --> B:iamRoles
     cloudwatch:L --> R:appsync
+    iamRoles:T --> B:appsync
 ```
+
+#### 🎯 最適化されたアーキテクチャの特徴
+
+**📱 Client Tier (クライアント層)**
+- **Web Browser**: モダンブラウザ対応のユーザーインターフェース
+
+**🎨 Presentation Tier (プレゼンテーション層)**
+- **React SPA**: コンポーネントベースのシングルページアプリケーション
+- **Vite Dev Server**: 高速な開発環境とHMR (Hot Module Replacement)
+- **AWS Amplify Client**: GraphQL統合とリアルタイム通信ライブラリ
+
+**⚡ Application Tier (アプリケーション層)**
+- **AppSync GraphQL API**: マネージドGraphQLエンドポイント
+- **Pipeline Resolvers**: 🆕 N+1問題解決の高効率2段階リゾルバー
+- **JavaScript Resolvers**: VTL不要の直感的ビジネスロジック実装
+
+**🔐 Authentication Tier (認証層)**
+- **Cognito User Pool**: ユーザー登録・管理・認証
+- **Cognito Identity Pool**: AWS リソースアクセス権限管理
+- **JWT Tokens**: 安全なトークンベース認証・認可
+
+**💾 Persistence Tier (永続化層)**
+- **DynamoDB Tables**: スケーラブルNoSQLデータストア
+- **GSI (Global Secondary Index)**: 効率的クエリ最適化
+  - **Owner Index**: ルーム作成者による高速検索
+  - **User Activity Index**: ユーザー活動履歴追跡
+  - **Room Message Index**: ルーム内メッセージの時系列取得
+
+**🏗️ Infrastructure Tier (インフラ層)**
+- **Terraform**: 再現可能なInfrastructure as Code
+- **CloudWatch**: 包括的なログ管理・パフォーマンス監視
+- **IAM Roles**: 最小権限原則に基づくセキュリティ制御
 
 ### コンテナダイアグラム（C4モデル）
 
