@@ -28,6 +28,28 @@ type Room {
   messages: [Message]  # このルームにあるメッセージの一覧（配列、任意）
 }
 
+# SentimentScore型: 感情分析スコアの詳細
+# 「メッセージの感情がどれくらいの強さかを数値で表す」
+type SentimentScore {
+  positive: Float!     # ポジティブ感情の強さ（0.0-1.0）
+  negative: Float!     # ネガティブ感情の強さ（0.0-1.0）
+  neutral: Float!      # 中立感情の強さ（0.0-1.0）
+  mixed: Float!        # 混合感情の強さ（0.0-1.0）
+}
+
+# SentimentAnalysis型: メッセージの感情分析結果
+# 「メッセージから読み取れる感情や言語の分析結果」
+type SentimentAnalysis {
+  messageId: ID!           # 分析対象のメッセージID（必須）
+  sentiment: String!       # 主要感情（POSITIVE, NEGATIVE, NEUTRAL, MIXED）
+  sentimentScore: SentimentScore!  # 感情スコアの詳細（必須）
+  language: String!        # 検出された言語コード（ja, en等）
+  languageConfidence: Float!  # 言語検出の信頼度（0.0-1.0）
+  isAppropriate: Boolean!  # 適切なコンテンツかどうか（必須）
+  moderationFlags: [String]  # 不適切コンテンツのフラグ一覧
+  analyzedAt: AWSDateTime!  # 分析実行日時（必須）
+}
+
 # Mutation: データを変更する操作の定義
 # 「新しいデータを作ったり、既存のデータを変更したりする操作」
 type Mutation {
@@ -56,6 +78,10 @@ type Query {
   # 特定のルームのメッセージ一覧を取得
   # roomId（ルームID）と limit（取得件数、任意）を受け取って、Message型の配列を返す
   listMessages(roomId: ID!, limit: Int): [Message]
+  
+  # メッセージの感情分析を実行（Lambda リゾルバー使用）
+  # messageId（メッセージID）を受け取って、感情分析結果を返す
+  analyzeMessageSentiment(messageId: ID!): SentimentAnalysis
 }
 
 # Subscription: リアルタイム通知の定義

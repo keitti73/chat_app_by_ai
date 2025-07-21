@@ -12,6 +12,8 @@
 
 ### ✅ 実装済み改善
 - **パイプラインリゾルバー対応**: myActiveRooms最適化アーキテクチャ
+- **AI感情分析機能**: AWS Comprehend統合による高度な分析
+- **Lambda統合**: サーバーレス処理によるスケーラブルなAI機能
 - **Terraform構文検証**: `terraform validate`でチェック済み
 - **GSI設計最適化**: 効率的なクエリパターン対応
 - **セキュリティ強化**: IAMロールの最小権限原則
@@ -29,6 +31,7 @@ infra/
 ├── dynamodb.tf                  # DynamoDB データベース
 ├── appsync.tf                   # AppSync GraphQL API
 ├── resolvers.tf                 # AppSync リゾルバー
+├── lambda.tf                    # 🤖 Lambda関数・AI機能設定（🆕）
 ├── outputs.tf                   # 出力値定義
 └── terraform.tfvars.example     # 変数ファイルテンプレート
 ```
@@ -51,38 +54,60 @@ graph TB
         AS[AppSync GraphQL API]
         DS1[DynamoDB DataSource Room]
         DS2[DynamoDB DataSource Message]
+        DS3[Lambda DataSource AI]
         RES[JavaScript Resolvers]
+        LAMBDA_RES[Lambda Resolvers]
+    end
+    
+    subgraph "AI Services"
+        LAMBDA[Lambda Function]
+        COMPREHEND[AWS Comprehend]
+        SQS[SQS Dead Letter Queue]
     end
     
     subgraph "データベース"
         ROOM[(DynamoDB Room Table)]
         MSG[(DynamoDB Message Table)]
+        SENTIMENT[(DynamoDB Sentiment Table)]
         GSI1[owner-index]
         GSI2[user-index]
         GSI3[room-index]
+        GSI4[sentiment-index]
     end
     
     subgraph "権限"
         IAM_AS[AppSync Service Role]
         IAM_CW[CloudWatch Logs Role]
+        IAM_LAMBDA[Lambda Execution Role]
+        IAM_COMPREHEND[Comprehend Access Role]
     end
     
     UP --> UPC
     UP --> IP
     AS --> DS1
     AS --> DS2
+    AS --> DS3
     DS1 --> ROOM
     DS2 --> MSG
+    DS3 --> LAMBDA
+    LAMBDA --> COMPREHEND
+    LAMBDA --> SENTIMENT
+    LAMBDA --> SQS
     ROOM --> GSI1
     MSG --> GSI2
     MSG --> GSI3
+    SENTIMENT --> GSI4
     AS --> IAM_AS
     AS --> IAM_CW
+    LAMBDA --> IAM_LAMBDA
+    LAMBDA --> IAM_COMPREHEND
 ```
 
 ### **技術スタック**
 - **AWS AppSync**: GraphQL API、リアルタイム通信
 - **DynamoDB**: NoSQL データベース、GSI による高速検索
+- **AWS Lambda**: サーバーレス関数、AI処理エンジン
+- **AWS Comprehend**: 自然言語処理、感情分析AI
 - **Cognito**: ユーザー認証・認可
 - **CloudWatch**: ログ・監視
 - **IAM**: アクセス制御
@@ -230,9 +255,51 @@ terraform output -raw appsync_api_key
 - Room テーブル名 (`dynamodb_room_table_name`)
 - Message テーブル名 (`dynamodb_message_table_name`)
 
+### **Lambda・AI機能設定**
+- Lambda 関数名 (`lambda_sentiment_function_name`)
+- Lambda 関数 ARN (`lambda_sentiment_function_arn`)
+- 感情分析テーブル名 (`dynamodb_sentiment_table_name`)
+- SQS Dead Letter Queue URL (`sqs_dlq_url`)
+
 ---
 
 ## 🛠️ カスタマイズ
+
+### **新しいLambda関数追加**
+
+1. `lambda.tf` にLambda関数定義を追加
+2. `appsync.tf` でLambdaデータソースを追加
+3. `../resolvers/` ディレクトリにLambda関数コードを作成
+
+```hcl
+# 新しいLambda関数例
+resource "aws_lambda_function" "content_moderation" {
+  filename         = "content_moderation.zip"
+  function_name    = "${var.project_name}-content-moderation"
+  role            = aws_iam_role.lambda_execution_role.arn
+  handler         = "index.handler"
+  runtime         = "nodejs18.x"
+  timeout         = 30
+  
+  environment {
+    variables = {
+      MODERATION_TABLE = aws_dynamodb_table.content_moderation.name
+    }
+  }
+}
+
+# AppSyncデータソース
+resource "aws_appsync_datasource" "content_moderation_lambda" {
+  api_id           = aws_appsync_graphql_api.chat_api.id
+  name             = "ContentModerationLambda"
+  service_role_arn = aws_iam_role.appsync_lambda_role.arn
+  type             = "AWS_LAMBDA"
+  
+  lambda_config {
+    function_arn = aws_lambda_function.content_moderation.arn
+  }
+}
+```
 
 ### **新しいDynamoDBテーブル追加**
 

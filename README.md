@@ -10,8 +10,19 @@
 このアプリで使用するGraphQLスキーマの基本構成：
 
 ```graphql
-# 主要な型定義
-type Room {
+# 主要な型定義│   └── templates/                 # 📄 実装テンプレート集
+│       ├── README.md              # テンプレート使用ガイド・一覧
+│       ├── graphql-schema-template.md       # GraphQLスキーマ設計
+│       ├── terraform-template.md            # Terraformテンプレート
+│       ├── javascript-resolver-basic-template.md      # 基本CRUD操作
+│       ├── javascript-resolver-advanced-template.md   # 高度なクエリ・統計
+│       ├── javascript-resolver-template.md            # 完全版（参考用）
+│       ├── lambda-resolver-template.md                 # 🤖 Lambdaリゾルバパターン（🆕）
+│       ├── react-graphql-template.md                  # GraphQL操作専用
+│       ├── react-components-template.md               # UIコンポーネント専用
+│       ├── react-forms-template.md                    # フォーム処理専用
+│       ├── react-styling-template.md                  # CSS・スタイリング専用
+│       └── react-frontend-template.md                 # 完全版（参考用）
   id: ID!              # ルーム識別番号
   name: String!        # ルーム名
   owner: String!       # 作成者
@@ -26,11 +37,31 @@ type Message {
   roomId: ID!          # 所属ルーム
 }
 
+# 🤖 AI感情分析結果（Lambda機能）
+type SentimentAnalysis {
+  messageId: ID!          # 分析対象メッセージ
+  sentiment: String!      # 感情（POSITIVE/NEGATIVE/NEUTRAL/MIXED）
+  confidence: Float!      # 信頼度（0.0-1.0）
+  scores: SentimentScore! # 詳細スコア
+  language: String        # 検出言語
+  isAppropriate: Boolean! # コンテンツ安全性
+  analyzedAt: AWSDateTime! # 分析日時
+}
+
+type SentimentScore {
+  positive: Float!        # ポジティブ度
+  negative: Float!        # ネガティブ度  
+  neutral: Float!         # 中立度
+  mixed: Float!          # 混合度
+}
+
 # データ操作
 type Query {
   myOwnedRooms: [Room]     # 自分が作ったルーム一覧
   myActiveRooms: [Room]    # 参加中のルーム一覧
   listMessages(roomId: ID!, limit: Int): [Message]  # メッセージ履歴
+  # 🤖 AI機能（Lambda）
+  analyzeMessageSentiment(messageId: ID!): SentimentAnalysis  # 感情分析
 }
 
 type Mutation {
@@ -49,6 +80,7 @@ type Subscription {
 - **[GraphQLスキーマ初心者ガイド](./doc/guides/GraphQLスキーマ初心者ガイド.md)** - 身近な例で理解
 - **[GraphQLスキーマ設計書](./doc/design/GraphQLスキーマ設計書.md)** - 技術仕様詳細
 - **[GraphQLクエリ実践ガイド](./doc/guides/GraphQLクエリ実践ガイド.md)** - 実装方法
+- **[Lambda機能ガイド](./doc/guides/Lambda機能ガイド.md)** - 🆕 AI感情分析機能の詳細
 
 ### データフロー図eact（Amplify）で実装する**Slack風リアルタイムチャットアプリ**の学習用リポジトリです。
 
@@ -76,6 +108,7 @@ type Subscription {
 [![TypeSc### 🧪 開発効率向上 {#typescript-migration}
 - [x] 🔍 **コード品質**: ESLint導入による継続的品質保証 ✅ **完了！**
 - [x] 📚 **ドキュメント体系化**: テンプレートファイルの機能別分割・スキルレベル別整理 ✅ **完了！**
+- [x] 🤖 **AI機能統合**: Lambda + Comprehend による感情分析システム ✅ **完了！**
 - [ ] 🔤 **TypeScript導入**: GraphQL Code Generator による型安全性
 - [ ] 🧪 **テスト自動化**: Jest + React Testing Library
 - [ ] 🎭 **E2Eテスト**: Playwright + モックAPI
@@ -91,11 +124,15 @@ type Subscription {
 - ⏰ **メッセージ履歴**: 過去のメッセージもちゃんと見れる
 - 🔐 **安全なログイン**: メールアドレスとパスワードで安全にログイン
 - 🆕 **ユーザー登録**: 新しくアカウントを作成して利用開始
+- 🤖 **AI感情分析**: メッセージの感情を自動解析（ポジティブ/ネガティブ/中立/混合）
+- 🌍 **多言語対応**: 25以上の言語でのメッセージ言語自動検出
+- 🛡️ **コンテンツ安全性**: 不適切なメッセージの自動検出と警告
 
 ## 🔧 技術スタック
 
-- **GraphQL API**: AWS AppSync（スキーマ・JavaScriptリゾルバー + パイプラインリゾルバー）
-- **データストア**: Amazon DynamoDB（Room/Messageテーブル＋GSI）
+- **GraphQL API**: AWS AppSync（スキーマ・JavaScriptリゾルバー + パイプラインリゾルバー + **Lambda リゾルバー**）
+- **高度なAI機能**: AWS Lambda + Comprehend（感情分析・言語検出・コンテンツ安全性チェック）
+- **データストア**: Amazon DynamoDB（Room/Message/SentimentAnalysisテーブル＋GSI）
 - **ユーザー認証**: Amazon Cognito（User Pool + Identity Pool）
 - **フロントエンド**: React＋Vite＋AWS Amplify v6
 - **IaC**: Terraform（Infrastructure as Code）
@@ -138,7 +175,13 @@ flowchart TB
     
     subgraph Backend["☁️ Backend Tier"]
         AppSync["AppSync GraphQL API"]
-        Resolvers["JavaScript Resolvers"]
+        JSResolvers["JavaScript Resolvers"]
+        LambdaResolvers["🤖 Lambda Resolvers"]
+    end
+    
+    subgraph AIServices["🤖 AI Services"]
+        Comprehend["AWS Comprehend<br/>感情分析・言語検出"]
+        Lambda["Lambda Functions<br/>高度な処理制御"]
     end
     
     subgraph Auth["🔐 Authentication"]
@@ -148,14 +191,20 @@ flowchart TB
     subgraph Data["🗄️ Data Tier"]
         DynamoDB["DynamoDB"]
         GSI["Global Secondary Indexes"]
+        SentimentTable["Sentiment Analysis Table"]
     end
     
     Browser --> React
     React --> Amplify
     Amplify --> AppSync
     AppSync --> Cognito
-    AppSync --> Resolvers
-    Resolvers --> DynamoDB
+    AppSync --> JSResolvers
+    AppSync --> LambdaResolvers
+    LambdaResolvers --> Lambda
+    Lambda --> Comprehend
+    JSResolvers --> DynamoDB
+    LambdaResolvers --> DynamoDB
+    LambdaResolvers --> SentimentTable
     DynamoDB --> GSI
 ```
 
@@ -172,7 +221,12 @@ flowchart TB
 **⚡ Application Tier (アプリケーション層)**
 - **AppSync GraphQL API**: マネージドGraphQLエンドポイント
 - **Pipeline Resolvers**: 🆕 N+1問題解決の高効率リゾルバー
-- **JavaScript Resolvers**: ビジネスロジック実装
+- **JavaScript Resolvers**: 基本的なビジネスロジック実装
+- **Lambda Resolvers**: 🆕 高度なAI処理・外部サービス連携
+
+**🤖 AI Services Tier (AI サービス層)**
+- **AWS Lambda**: 複雑な非同期処理・外部API連携
+- **AWS Comprehend**: 感情分析・言語検出・エンティティ抽出
 
 **🔐 Authentication Tier (認証層)**
 - **Cognito User Pool**: ユーザー管理・認証
@@ -181,10 +235,14 @@ flowchart TB
 
 **💾 Persistence Tier (永続化層)**
 - **DynamoDB Tables**: NoSQLデータストア
+  - **Room Table**: チャットルーム情報
+  - **Message Table**: メッセージデータ
+  - **Sentiment Analysis Table**: 🆕 AI分析結果の保存
 - **GSI (Global Secondary Index)**: 効率的クエリ最適化
   - Owner Index: ルーム作成者検索
   - User Activity Index: ユーザー活動履歴
   - Room Message Index: ルーム内メッセージ履歴
+  - Analysis Date Index: 🆕 分析結果の時系列検索
 
 **🏗️ Infrastructure Tier (インフラ層)**
 - **Terraform**: Infrastructure as Code
@@ -288,7 +346,8 @@ npm run dev
 │   │   ├── API追加ガイド.md        # 新機能開発の詳細手順
 │   │   ├── API追加テンプレート.md   # クイックスタートガイド
 │   │   ├── GraphQLスキーマ初心者ガイド.md  # GraphQL基礎解説（🆕）
-│   │   └── GraphQLクエリ実践ガイド.md      # 実装コード実践（🆕）
+│   │   ├── GraphQLクエリ実践ガイド.md      # 実装コード実践（🆕）
+│   │   └── Lambda機能ガイド.md             # 🤖 AI感情分析機能詳細（🆕）
 │   └── templates/                 # � 実装テンプレート集
 │       ├── README.md              # テンプレート使用ガイド・一覧
 │       ├── graphql-schema-template.md       # GraphQLスキーマ設計
@@ -321,6 +380,7 @@ npm run dev
 │   ├── appsync.tf                # 📡 API サーバーの設定
 │   ├── cognito.tf                # 🔐 ユーザー認証の設定
 │   ├── resolvers.tf              # 🔄 データ処理ロジックの設定
+│   ├── lambda.tf                 # 🤖 Lambda関数・AI機能設定（🆕）
 │   ├── outputs.tf                # 📋 作成したサービスの情報出力
 │   └── terraform.tfvars.example  # 環境変数設定例
 ├── resolvers/                     # 🧠 サーバー側のデータ処理ロジック
@@ -330,6 +390,10 @@ npm run dev
 │   ├── Query_getRoom.js              # ルーム情報取得
 │   ├── Query_listMessages.js         # メッセージ一覧取得
 │   ├── Query_myOwnedRooms.js         # 自分のルーム一覧
+│   ├── Query_myActiveRooms.js        # アクティブルーム複合クエリ
+│   ├── Pipeline_myActiveRooms_1_getMessages.js  # パイプライン1段目
+│   ├── Pipeline_myActiveRooms_2_getRooms.js     # パイプライン2段目
+│   └── Lambda_analyzeMessageSentiment.js        # 🤖 AI感情分析処理（🆕）
 │   ├── Query_myActiveRooms.js        # 参加中ルーム一覧（単体版）
 │   ├── Pipeline_myActiveRooms_1_getMessages.js  # パイプライン第1段階
 │   └── Pipeline_myActiveRooms_2_getRooms.js     # パイプライン第2段階

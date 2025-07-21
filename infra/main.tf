@@ -37,3 +37,11 @@ variable "project_name" {
   type        = string             # 文字列タイプ
   default     = "appsync-chat-app" # デフォルト値
 }
+
+# 変数の定義：環境
+# 開発、本番環境などを区別するためのラベル
+variable "environment" {
+  description = "Environment (dev, staging, prod)" # この変数の説明
+  type        = string                             # 文字列タイプ
+  default     = "dev"                              # デフォルト値（開発環境）
+}

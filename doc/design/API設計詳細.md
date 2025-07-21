@@ -9,6 +9,7 @@ flowchart TB
     subgraph "Frontend Applications"
         A[React App]
         B[Mobile App]
+        SA[🤖 Sentiment Analysis UI]
     end
     
     subgraph "API Gateway Layer"
@@ -23,24 +24,40 @@ flowchart TB
     
     subgraph "Business Logic Layer"
         G[JavaScript Resolvers]
+        LR[🤖 Lambda Resolvers]
         H[Input Validators]
+    end
+    
+    subgraph "AI Services Layer"
+        L[Lambda Functions]
+        COM[AWS Comprehend]
     end
     
     subgraph "Data Access Layer"
         I[DynamoDB]
         J[DynamoDB Streams]
+        ST[🎭 Sentiment Table]
     end
     
     A --> C
     B --> C
+    SA --> C
     C --> E
     C --> G
+    C --> LR
+    LR --> L
+    L --> COM
     G --> I
+    LR --> I
+    LR --> ST
     I --> J
     
     style C fill:#ff6b6b
     style G fill:#4ecdc4
+    style LR fill:#ff9500
     style I fill:#45b7d1
+    style L fill:#9b59b6
+    style COM fill:#2ecc71
 ```
 
 ## 2. GraphQL スキーマ設計
@@ -78,6 +95,7 @@ classDiagram
         +AWSDateTime! createdAt
         +ID! roomId
         +Room room
+        +SentimentAnalysis sentiment
     }
     
     class Room {
@@ -89,11 +107,32 @@ classDiagram
         +Int messageCount
     }
     
+    class SentimentAnalysis {
+        +ID! messageId
+        +String! sentiment
+        +Float! confidence
+        +SentimentScore! scores
+        +String language
+        +Float languageConfidence
+        +Boolean! isAppropriate
+        +[String!]! flags
+        +AWSDateTime! analyzedAt
+        +Int! processingTime
+    }
+    
+    class SentimentScore {
+        +Float! positive
+        +Float! negative
+        +Float! neutral
+        +Float! mixed
+    }
+    
     class Query {
         +myOwnedRooms() [Room]
         +myActiveRooms() [Room]
         +getRoom(id: ID!) Room
         +listMessages(roomId: ID!, limit: Int) [Message]
+        +analyzeMessageSentiment(messageId: ID!) SentimentAnalysis
     }
     
     class Mutation {

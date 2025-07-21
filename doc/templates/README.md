@@ -13,6 +13,9 @@
 - [`javascript-resolver-advanced-template.md`](./javascript-resolver-advanced-template.md) - 高度なクエリ・検索・統計リゾルバー
 - [`javascript-resolver-template.md`](./javascript-resolver-template.md) - 完全版リゾルバーテンプレート（参考用）
 
+### 🚀 Lambda リゾルバー関連
+- [`lambda-resolver-template.md`](./lambda-resolver-template.md) - 🆕 AI機能・外部サービス連携リゾルバー
+
 ### ⚛️ React フロントエンド関連
 - [`react-graphql-template.md`](./react-graphql-template.md) - GraphQL操作（クエリ・ミューテーション・サブスクリプション）
 - [`react-components-template.md`](./react-components-template.md) - UIコンポーネント（一覧・カード・エラー境界など）
@@ -37,8 +40,9 @@
 
 ### 🎯 上級者向け
 1. **完全版テンプレート**: 各 `*-template.md` ファイル
-2. **カスタマイズとパフォーマンス最適化**
-3. **複合的な機能実装**
+2. **Lambda リゾルバーでのAI機能**: [`lambda-resolver-template.md`](./lambda-resolver-template.md)
+3. **カスタマイズとパフォーマンス最適化**
+4. **複合的な機能実装**
 
 ## 📝 テンプレート使用方法
 

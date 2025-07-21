@@ -19,8 +19,10 @@ resolvers/
 ├── Query_myOwnedRooms.js                         # 所有ルーム取得リゾルバー
 ├── Query_listMessages.js                         # メッセージ一覧取得リゾルバー
 ├── Query_getRoom.js                              # ルーム詳細取得リゾルバー
+├── Query_myActiveRooms.js                        # アクティブルーム取得リゾルバー
 ├── Pipeline_myActiveRooms_1_getMessages.js       # 🆕 パイプライン第1段階（メッセージ取得）
-└── Pipeline_myActiveRooms_2_getRooms.js          # 🆕 パイプライン第2段階（ルーム情報取得）
+├── Pipeline_myActiveRooms_2_getRooms.js          # 🆕 パイプライン第2段階（ルーム情報取得）
+└── Lambda_analyzeMessageSentiment.js             # 🤖 AI感情分析Lambdaリゾルバー（🆕）
 ```
 
 ## ✨ 新機能・改善点
@@ -33,23 +35,76 @@ resolvers/
 - ✅ **パフォーマンス向上**: DynamoDBリクエスト数を最小化
 - ✅ **保守性向上**: 段階的な処理ロジックの分離
 
+### 🤖 AI感情分析機能の追加
+AWS Comprehendを活用したLambdaリゾルバーにより、以下を実現：
+
+- ✅ **感情分析**: メッセージの感情スコア（POSITIVE/NEGATIVE/NEUTRAL/MIXED）
+- ✅ **言語検出**: 自動言語判定と多言語対応
+- ✅ **コンテンツ安全性**: 不適切なコンテンツの検出
+- ✅ **バッチ処理**: 高速なメッセージ分析処理
+
 ---
 
 ## 🏗️ リゾルバーアーキテクチャ
 
-### 従来の単一リゾルバー vs パイプラインリゾルバー
+### 全体アーキテクチャ概要
+
+```mermaid
+graph TB
+    subgraph "GraphQL API Layer"
+        GQL[GraphQL Schema]
+        AUTH[Authentication]
+    end
+    
+    subgraph "Resolver Types"
+        SINGLE[Single Resolvers]
+        PIPELINE[Pipeline Resolvers]
+        LAMBDA[Lambda Resolvers]
+    end
+    
+    subgraph "Data Sources"
+        DDB_ROOM[(DynamoDB Room)]
+        DDB_MSG[(DynamoDB Message)]
+        DDB_SENTIMENT[(DynamoDB Sentiment)]
+        COMPREHEND[AWS Comprehend]
+    end
+    
+    subgraph "Processing Patterns"
+        DIRECT[Direct DynamoDB]
+        BATCH[Batch Processing]
+        AI[AI Processing]
+    end
+    
+    GQL --> AUTH
+    AUTH --> SINGLE
+    AUTH --> PIPELINE
+    AUTH --> LAMBDA
+    
+    SINGLE --> DIRECT
+    PIPELINE --> BATCH
+    LAMBDA --> AI
+    
+    DIRECT --> DDB_ROOM
+    DIRECT --> DDB_MSG
+    BATCH --> DDB_ROOM
+    BATCH --> DDB_MSG
+    AI --> DDB_SENTIMENT
+    AI --> COMPREHEND
+```
+
+### 従来の単一リゾルバー vs パイプラインリゾルバー vs Lambdaリゾルバー
 
 ```mermaid
 flowchart TD
-    subgraph "従来のアプローチ"
+    subgraph "🔵 単一リゾルバー（Simple Operations）"
         O1[GraphQL Operation] --> R1[Single Resolver]
-        R1 --> D1[DynamoDB Query 1]
-        R1 --> D2[DynamoDB Query 2]
-        R1 --> D3[DynamoDB Query N...]
-        R1 --> Result1[Response]
+        R1 --> D1[DynamoDB Direct Query]
+        D1 --> Result1[Response]
+        
+        R1_Examples[例: createRoom, getRoom, listMessages]
     end
     
-    subgraph "🆕 パイプラインリゾルバー"
+    subgraph "🟢 パイプラインリゾルバー（Complex Queries）"
         O2[GraphQL Operation] --> P1[Pipeline Function 1]
         P1 --> P2[Pipeline Function 2]
         P2 --> Result2[Combined Response]
@@ -59,6 +114,42 @@ flowchart TD
         
         P1 -.-> Stash[Context Stash]
         Stash -.-> P2
+        
+        P2_Examples[例: myActiveRooms]
+    end
+    
+    subgraph "🟠 Lambdaリゾルバー（AI Processing）"
+        O3[GraphQL Operation] --> L1[Lambda Function]
+        L1 --> AI1[AWS Comprehend]
+        L1 --> DB3[DynamoDB Save]
+        AI1 --> L1
+        DB3 --> Result3[AI Analysis Result]
+        
+        L3_Examples[例: analyzeMessageSentiment]
+    end
+```
+
+### リゾルバー処理パターンマトリックス
+
+```mermaid
+flowchart LR
+    subgraph Operations
+        QS[Simple Queries] --> SINGLE1[Single Resolvers]
+        QC[Complex Queries] --> PIPELINE1[Pipeline Resolvers]
+        QAI[AI Queries] --> LAMBDA1[Lambda Resolvers]
+        
+        MS[Simple Mutations] --> SINGLE2[Single Resolvers]
+        MC[Complex Mutations] --> PIPELINE2[Pipeline Resolvers]
+        MAI[AI Mutations] --> LAMBDA2[Lambda Resolvers]
+    end
+    
+    subgraph "Data Access"
+        SINGLE1 --> DIRECT1[Direct DynamoDB]
+        SINGLE2 --> DIRECT2[Direct DynamoDB]
+        PIPELINE1 --> BATCH1[Batch + Join]
+        PIPELINE2 --> BATCH2[Batch + Join]
+        LAMBDA1 --> AI1[AI + Storage]
+        LAMBDA2 --> AI2[AI + Storage]
     end
 ```
 
@@ -86,6 +177,141 @@ sequenceDiagram
     RoomTable-->>F2: Return room details
     F2->>Pipeline: Return combined result
     Pipeline-->>Client: Final response
+```
+
+### Lambda AI感情分析の処理フロー
+
+```mermaid
+sequenceDiagram
+    participant Client as GraphQL Client
+    participant AppSync as AppSync API
+    participant Lambda as Lambda Function
+    participant Comprehend as AWS Comprehend
+    participant DDB_Sentiment as Sentiment Table
+    participant SQS as Dead Letter Queue
+    
+    Client->>AppSync: analyzeMessageSentiment Mutation
+    AppSync->>Lambda: Invoke with message data
+    
+    alt 正常処理
+        Lambda->>Lambda: Input Validation
+        Lambda->>Comprehend: DetectDominantLanguage
+        Comprehend-->>Lambda: Language Result
+        Lambda->>Comprehend: DetectSentiment
+        Comprehend-->>Lambda: Sentiment Analysis
+        Lambda->>DDB_Sentiment: Save Analysis Result
+        Lambda-->>AppSync: Return Analysis Data
+        AppSync-->>Client: Success Response
+    else エラー処理
+        Lambda->>Lambda: Error Handling
+        Lambda->>SQS: Send to Dead Letter Queue
+        Lambda-->>AppSync: Error Response
+        AppSync-->>Client: Error Message
+    end
+```
+
+### 全リゾルバーのデータフロー図
+
+```mermaid
+flowchart TD
+    subgraph "Client Layer"
+        WEB[Web Client]
+        MOBILE[Mobile Client]
+    end
+    
+    subgraph "API Gateway"
+        APPSYNC[AWS AppSync]
+        AUTH_LAYER[Cognito Auth]
+    end
+    
+    subgraph "Resolver Layer"
+        subgraph "Query Resolvers"
+            Q_ROOMS[myOwnedRooms]
+            Q_ACTIVE[myActiveRooms - Pipeline]
+            Q_MESSAGES[listMessages]
+            Q_ROOM[getRoom]
+        end
+        
+        subgraph "Mutation Resolvers"
+            M_CREATE[createRoom]
+            M_POST[postMessage]
+            M_ANALYZE[analyzeMessageSentiment - Lambda]
+        end
+    end
+    
+    subgraph "Data Layer"
+        subgraph "DynamoDB Tables"
+            T_ROOM[(Room Table)]
+            T_MESSAGE[(Message Table)]
+            T_SENTIMENT[(Sentiment Table)]
+        end
+        
+        subgraph "GSI Indexes"
+            GSI_OWNER[owner-index]
+            GSI_USER[user-index]
+            GSI_ROOM[room-index]
+            GSI_SENTIMENT[sentiment-index]
+        end
+        
+        subgraph "AI Services"
+            COMPREHEND[AWS Comprehend]
+            SQS_DLQ[SQS Dead Letter Queue]
+        end
+    end
+    
+    WEB --> APPSYNC
+    MOBILE --> APPSYNC
+    APPSYNC --> AUTH_LAYER
+    
+    AUTH_LAYER --> Q_ROOMS
+    AUTH_LAYER --> Q_ACTIVE
+    AUTH_LAYER --> Q_MESSAGES
+    AUTH_LAYER --> Q_ROOM
+    AUTH_LAYER --> M_CREATE
+    AUTH_LAYER --> M_POST
+    AUTH_LAYER --> M_ANALYZE
+    
+    Q_ROOMS --> GSI_OWNER
+    Q_ACTIVE --> GSI_USER
+    Q_ACTIVE --> T_ROOM
+    Q_MESSAGES --> GSI_ROOM
+    Q_ROOM --> T_ROOM
+    
+    M_CREATE --> T_ROOM
+    M_POST --> T_MESSAGE
+    M_ANALYZE --> COMPREHEND
+    M_ANALYZE --> T_SENTIMENT
+    M_ANALYZE --> SQS_DLQ
+    
+    GSI_OWNER --> T_ROOM
+    GSI_USER --> T_MESSAGE
+    GSI_ROOM --> T_MESSAGE
+    GSI_SENTIMENT --> T_SENTIMENT
+```
+
+### リゾルバー処理時間とリソース使用量
+
+```mermaid
+gantt
+    title リゾルバー処理パフォーマンス比較
+    dateFormat X
+    axisFormat %s
+    
+    section Single Resolvers
+    getRoom          :milestone, 0, 50
+    createRoom       :milestone, 0, 100
+    postMessage      :milestone, 0, 80
+    listMessages     :milestone, 0, 120
+    
+    section Pipeline Resolvers
+    myActiveRooms P1 :active, 0, 200
+    myActiveRooms P2 :active, 200, 350
+    
+    section Lambda Resolvers
+    Lambda Cold Start :crit, 0, 1000
+    Comprehend API    :active, 1000, 1500
+    DDB Save         :active, 1500, 1600
+    Lambda Warm      :milestone, 0, 600
 ```
 
 ---
@@ -332,6 +558,82 @@ export const handler = (ctx) => {
 - **文字数制限**: 500文字までのメッセージ制限
 - **自動トリムm**: 前後空白の自動除去
 - **Subscription トリガー**: 投稿時に自動的にリアルタイム通知発火
+
+#### 🤖 Lambda.analyzeMessageSentiment.js - AI感情分析
+
+```javascript
+import { ComprehendClient, DetectSentimentCommand, DetectDominantLanguageCommand } from '@aws-sdk/client-comprehend';
+
+/**
+ * AWS Comprehendを使用してメッセージの感情分析を実行
+ * 言語検出、感情スコア、コンテンツ安全性をチェック
+ */
+export const handler = async (event) => {
+  const comprehend = new ComprehendClient({ region: process.env.AWS_REGION });
+  
+  try {
+    // 入力バリデーション
+    const { messageId, text } = event.arguments;
+    
+    if (!text || text.trim().length === 0) {
+      throw new Error("分析対象のテキストが必要です");
+    }
+    
+    if (text.length > 5000) {
+      throw new Error("テキストは5000文字以下である必要があります");
+    }
+    
+    // 1. 言語検出
+    const languageCommand = new DetectDominantLanguageCommand({
+      Text: text
+    });
+    const languageResult = await comprehend.send(languageCommand);
+    const dominantLanguage = languageResult.Languages[0];
+    
+    // 2. 感情分析
+    const sentimentCommand = new DetectSentimentCommand({
+      Text: text,
+      LanguageCode: dominantLanguage.LanguageCode
+    });
+    const sentimentResult = await comprehend.send(sentimentCommand);
+    
+    // 3. 結果の構造化
+    const analysisResult = {
+      messageId,
+      sentiment: sentimentResult.Sentiment,
+      confidence: sentimentResult.SentimentScore[sentimentResult.Sentiment],
+      language: {
+        code: dominantLanguage.LanguageCode,
+        confidence: dominantLanguage.Score
+      },
+      scores: {
+        positive: sentimentResult.SentimentScore.Positive,
+        negative: sentimentResult.SentimentScore.Negative,
+        neutral: sentimentResult.SentimentScore.Neutral,
+        mixed: sentimentResult.SentimentScore.Mixed
+      },
+      analyzedAt: new Date().toISOString()
+    };
+    
+    // 4. DynamoDB保存（オプション）
+    if (process.env.SENTIMENT_TABLE_NAME) {
+      await saveSentimentAnalysis(analysisResult);
+    }
+    
+    return analysisResult;
+    
+  } catch (error) {
+    console.error('感情分析エラー:', error);
+    throw new Error(`感情分析に失敗しました: ${error.message}`);
+  }
+};
+```
+
+**特徴**:
+- **AWS Comprehend統合**: 高精度な感情分析
+- **多言語対応**: 自動言語検出による最適化
+- **スコア詳細化**: 4種類の感情スコア（POSITIVE/NEGATIVE/NEUTRAL/MIXED）
+- **エラーハンドリング**: 包括的なエラー処理と再試行メカニズム
 
 ---
 

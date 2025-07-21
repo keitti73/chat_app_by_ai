@@ -25,8 +25,9 @@
 
 ## 📊 技術スタック
 
-- **GraphQL API**: AppSync（スキーマ・リゾルバーJS）
-- **データストア**: DynamoDB（Room/Messageテーブル＋GSI）
+- **GraphQL API**: AppSync（スキーマ・リゾルバーJS + Lambda）
+- **AI機能**: AWS Lambda + Comprehend（感情分析・言語検出・コンテンツ安全性）
+- **データストア**: DynamoDB（Room/Message/SentimentAnalysisテーブル＋GSI）
 - **ユーザー認証**: Cognito（User Pool + Identity Pool）
 - **フロントエンド**: React＋Vite＋Amplify v6
 - **IaC**: Terraform
@@ -54,6 +55,13 @@ flowchart TB
         AppSync["🚀 AppSync GraphQL API"]
         Pipeline["⚙️ Pipeline Resolvers"]
         JSResolvers["📜 JavaScript Resolvers"]
+        LambdaResolvers["🤖 Lambda Resolvers"]
+    end
+    
+    subgraph AIServices["AI Services Tier"]
+        Lambda["🚀 Lambda Functions"]
+        Comprehend["🧠 AWS Comprehend"]
+        SQS["📫 SQS Dead Letter Queue"]
     end
     
     subgraph Authentication["Authentication Tier"]
@@ -65,9 +73,11 @@ flowchart TB
     subgraph Persistence["Persistence Tier"]
         DynamoRooms["📊 DynamoDB Room Table"]
         DynamoMessages["💬 DynamoDB Message Table"]
+        DynamoSentiment["🎭 DynamoDB Sentiment Table"]
         GSIOwner["📋 Owner Index"]
         GSIUser["👤 User Activity Index"]
         GSIRoom["🏠 Room Message Index"]
+        GSIAnalysis["📈 Analysis Date Index"]
     end
     
     subgraph Infrastructure["Infrastructure Tier"]
@@ -86,18 +96,28 @@ flowchart TB
     UserPool --> JWT
     AppSync --> Pipeline
     AppSync --> JSResolvers
+    AppSync --> LambdaResolvers
+    LambdaResolvers --> Lambda
+    Lambda --> Comprehend
+    Lambda --> SQS
     Pipeline --> DynamoRooms
     Pipeline --> DynamoMessages
     JSResolvers --> DynamoRooms
     JSResolvers --> DynamoMessages
+    LambdaResolvers --> DynamoSentiment
+    LambdaResolvers --> DynamoMessages
     DynamoRooms --> GSIOwner
     DynamoMessages --> GSIUser
     DynamoMessages --> GSIRoom
+    DynamoSentiment --> GSIAnalysis
     Terraform --> AppSync
     Terraform --> DynamoRooms
     Terraform --> DynamoMessages
+    Terraform --> DynamoSentiment
+    Terraform --> Lambda
     Terraform --> UserPool
     Terraform --> IAMRoles
+    Lambda --> CloudWatch
     CloudWatch --> AppSync
     IAMRoles --> AppSync
 ```
@@ -116,6 +136,12 @@ flowchart TB
 - **AppSync GraphQL API**: マネージドGraphQLエンドポイント
 - **Pipeline Resolvers**: 🆕 N+1問題解決の高効率2段階リゾルバー
 - **JavaScript Resolvers**: VTL不要の直感的ビジネスロジック実装
+- **Lambda Resolvers**: 🆕 AI機能・外部サービス連携・高度な処理制御
+
+**🤖 AI Services Tier (AI サービス層)**
+- **Lambda Functions**: 複雑な非同期処理・外部API連携
+- **AWS Comprehend**: 感情分析・言語検出・エンティティ抽出
+- **SQS Dead Letter Queue**: エラー処理・メッセージ再試行制御
 
 **🔐 Authentication Tier (認証層)**
 - **Cognito User Pool**: ユーザー登録・管理・認証
@@ -124,9 +150,14 @@ flowchart TB
 
 **💾 Persistence Tier (永続化層)**
 - **DynamoDB Tables**: スケーラブルNoSQLデータストア
+  - **Room Table**: チャットルーム情報
+  - **Message Table**: メッセージデータ
+  - **Sentiment Analysis Table**: 🆕 AI分析結果の保存・キャッシュ
 - **GSI (Global Secondary Index)**: 効率的クエリ最適化
   - **Owner Index**: ルーム作成者による高速検索
   - **User Activity Index**: ユーザー活動履歴追跡
+  - **Room Message Index**: ルーム内メッセージ履歴の効率的取得
+  - **Analysis Date Index**: 🆕 分析結果の時系列検索・統計処理
   - **Room Message Index**: ルーム内メッセージの時系列取得
 
 **🏗️ Infrastructure Tier (インフラ層)**
