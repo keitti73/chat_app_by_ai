@@ -26,6 +26,24 @@ classDiagram
         +Message[] messages
     }
     
+    class SentimentAnalysis {
+        +ID messageId
+        +String sentiment
+        +SentimentScore sentimentScore
+        +String language
+        +Float languageConfidence
+        +Boolean isAppropriate
+        +String[] moderationFlags
+        +AWSDateTime analyzedAt
+    }
+    
+    class SentimentScore {
+        +Float positive
+        +Float negative
+        +Float neutral
+        +Float mixed
+    }
+    
     class Query {
         +myOwnedRooms() Room[]
         +myActiveRooms() Room[]
@@ -36,6 +54,7 @@ classDiagram
     class Mutation {
         +createRoom(name String) Room
         +postMessage(roomId ID, text String) Message
+        +analyzeMessageSentiment(messageId ID, text String) SentimentAnalysis
     }
     
     class Subscription {
@@ -44,10 +63,13 @@ classDiagram
     }
     
     Room "1" --> "0..*" Message : contains
+    Message "1" --> "0..1" SentimentAnalysis : analyzed_by
+    SentimentAnalysis "1" --> "1" SentimentScore : has
     Query --> Room : returns
     Query --> Message : returns
     Mutation --> Room : creates
     Mutation --> Message : creates
+    Mutation --> SentimentAnalysis : analyzes
     Subscription --> Room : notifies
     Subscription --> Message : notifies
 ```

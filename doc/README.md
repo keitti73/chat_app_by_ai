@@ -17,6 +17,7 @@
 - **[overview.md](./design/overview.md)** - 設計概要
 - **[データベース設計詳細.md](./design/データベース設計詳細.md)** - DynamoDB設計詳細
 - **[API設計詳細.md](./design/API設計詳細.md)** - GraphQL API設計
+- **[GraphQLスキーマ設計書.md](./design/GraphQLスキーマ設計書.md)** - GraphQLスキーマ技術仕様（🆕）
 - **[データフロー設計書.md](./design/データフロー設計書.md)** - データフロー仕様
 
 ### 📋 [開発ガイド](./guides/)
@@ -24,6 +25,11 @@
 
 - **[API追加ガイド.md](./guides/API追加ガイド.md)** - 新機能開発の詳細手順
 - **[API追加テンプレート.md](./guides/API追加テンプレート.md)** - クイックスタートガイド
+- **[GraphQLスキーマ初心者ガイド.md](./guides/GraphQLスキーマ初心者ガイド.md)** - GraphQL基礎解説（🆕）
+- **[GraphQLクエリ実践ガイド.md](./guides/GraphQLクエリ実践ガイド.md)** - 実装コード実践（🆕）
+- **[Lambda機能ガイド.md](./guides/Lambda機能ガイド.md)** - 🤖 AI感情分析機能詳細（🆕）
+- **[フロントエンドAI機能ガイド.md](./guides/フロントエンドAI機能ガイド.md)** - 🎨 React AI統合ガイド（🆕）
+- **[デプロイメント動作確認ガイド.md](./guides/デプロイメント動作確認ガイド.md)** - 🚀 完全デプロイ手順（🆕）
 
 ### 🚀 [テンプレート](./templates/)
 実装用テンプレートファイル集
@@ -48,6 +54,20 @@
 
 ### 🔰 初心者向け
 1. **[アーキテクチャ概要](./architecture/overview.md)** でプロジェクト全体を把握
+2. **[GraphQLスキーマ初心者ガイド](./guides/GraphQLスキーマ初心者ガイド.md)** でGraphQL基礎を理解
+3. **[設計概要](./design/overview.md)** でデータベース・API設計を確認
+4. **[API追加テンプレート](./guides/API追加テンプレート.md)** でクイックスタート
+
+### 🚀 中級者向け
+1. **[GraphQLクエリ実践ガイド](./guides/GraphQLクエリ実践ガイド.md)** で実装手法を習得
+2. **[Lambda機能ガイド](./guides/Lambda機能ガイド.md)** でAI機能を理解
+3. **[フロントエンドAI機能ガイド](./guides/フロントエンドAI機能ガイド.md)** でReact統合を学習
+4. **[API追加ガイド](./guides/API追加ガイド.md)** で新機能開発手順を習得
+
+### 🏆 上級者向け
+1. **[GraphQLスキーマ設計書](./design/GraphQLスキーマ設計書.md)** で技術仕様詳細を確認
+2. **[システムアーキテクチャ図集](./architecture/システムアーキテクチャ図集.md)** で全体設計を把握
+3. **[テンプレート集](./templates/)** で高度な実装パターンを活用
 2. **[設計概要](./design/overview.md)** でデータベース・API設計を理解
 3. **[API追加テンプレート](./guides/API追加テンプレート.md)** でクイックスタート
 4. **基本テンプレート** で実装練習

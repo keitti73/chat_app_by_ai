@@ -118,3 +118,18 @@ resource "aws_appsync_resolver" "list_messages" {
 
   code = file("${path.module}/../resolvers/Query_listMessages.js")
 }
+
+# 🤖 Mutation: analyzeMessageSentiment (Lambda リゾルバー)
+resource "aws_appsync_resolver" "analyze_message_sentiment" {
+  api_id      = aws_appsync_graphql_api.chat_api.id
+  field       = "analyzeMessageSentiment"
+  type        = "Mutation"
+  data_source = aws_appsync_datasource.lambda_sentiment.name
+
+  runtime {
+    name            = "APPSYNC_JS"
+    runtime_version = "1.0.0"
+  }
+
+  code = file("${path.module}/../resolvers/Lambda_analyzeMessageSentiment.js")
+}

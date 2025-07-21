@@ -104,20 +104,17 @@ classDiagram
         +String! owner
         +AWSDateTime! createdAt
         +[Message] messages
-        +Int messageCount
     }
     
     class SentimentAnalysis {
         +ID! messageId
         +String! sentiment
-        +Float! confidence
-        +SentimentScore! scores
-        +String language
-        +Float languageConfidence
+        +SentimentScore! sentimentScore
+        +String! language
+        +Float! languageConfidence
         +Boolean! isAppropriate
-        +[String!]! flags
+        +[String] moderationFlags
         +AWSDateTime! analyzedAt
-        +Int! processingTime
     }
     
     class SentimentScore {
@@ -128,30 +125,26 @@ classDiagram
     }
     
     class Query {
-        +myOwnedRooms() [Room]
-        +myActiveRooms() [Room]
-        +getRoom(id: ID!) Room
-        +listMessages(roomId: ID!, limit: Int) [Message]
-        +analyzeMessageSentiment(messageId: ID!) SentimentAnalysis
+        +[Room] myOwnedRooms
+        +[Room] myActiveRooms
+        +Room getRoom(id: ID!)
+        +[Message] listMessages(roomId: ID!, limit: Int)
     }
     
     class Mutation {
-        +createRoom(name: String!) Room
-        +postMessage(roomId: ID!, text: String!) Message
-        +deleteRoom(id: ID!) Boolean
-        +updateRoom(id: ID!, name: String!) Room
+        +Room createRoom(name: String!)
+        +Message postMessage(roomId: ID!, text: String!)
+        +SentimentAnalysis analyzeMessageSentiment(messageId: ID!, text: String!)
     }
     
     class Subscription {
-        +onRoomCreated() Room
-        +onMessagePosted(roomId: ID!) Message
-        +onRoomUpdated(id: ID!) Room
-        +onRoomDeleted() ID
+        +Room onRoomCreated
+        +Message onMessagePosted(roomId: ID!)
     }
     
-    Message --> Room : belongsTo
-    Room --> Message : hasMany
-```
+    Message ||--|| Room : belongsTo
+    Message ||--o| SentimentAnalysis : hasAnalysis
+    SentimentAnalysis ||--|| SentimentScore : contains
 
 ## 3. Query操作設計
 

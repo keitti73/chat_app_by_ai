@@ -36,3 +36,27 @@ export const postMessage = /* GraphQL */ `
     }
   }
 `;
+
+// 🤖 メッセージの感情分析を実行するミューテーション（Lambda リゾルバー）
+// 「analyzeMessageSentiment」という名前で、メッセージのAI感情分析を実行
+// $messageId: ID! = 分析対象のメッセージID（必須）
+// $text: String! = 分析対象のテキスト（必須）
+export const analyzeMessageSentimentMutation = /* GraphQL */ `
+  mutation AnalyzeMessageSentiment($messageId: ID!, $text: String!) {
+    analyzeMessageSentiment(messageId: $messageId, text: $text) {
+      messageId                # 分析対象のメッセージID
+      sentiment                # 主要感情（POSITIVE, NEGATIVE, NEUTRAL, MIXED）
+      sentimentScore {         # 感情スコアの詳細
+        positive               # ポジティブ感情スコア（0.0-1.0）
+        negative               # ネガティブ感情スコア（0.0-1.0）
+        neutral                # 中立感情スコア（0.0-1.0）
+        mixed                  # 混合感情スコア（0.0-1.0）
+      }
+      language                 # 検出された言語コード（ja, en等）
+      languageConfidence       # 言語検出の信頼度（0.0-1.0）
+      isAppropriate           # 適切なコンテンツかどうか
+      moderationFlags         # 不適切コンテンツのフラグ一覧
+      analyzedAt              # 分析実行日時
+    }
+  }
+`;

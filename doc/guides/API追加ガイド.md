@@ -366,7 +366,69 @@ type Subscription {
 - 🛠️ [Apollo Client DevTools](https://www.apollographql.com/docs/react/development-testing/developer-tooling/) - ブラウザ拡張
 - 🛠️ [Terraform VS Code Extension](https://marketplace.visualstudio.com/items?itemName=HashiCorp.terraform)
 
-## 💡 次のステップ
+## � フロントエンド・バックエンド整合性確認
+
+新しいAPI機能を追加する際は、必ずフロントエンドとバックエンドの整合性を確認してください。
+
+### ✅ 確認必須項目
+
+1. **GraphQLスキーマの整合性**
+   - パラメータの型と必須/任意の一致
+   - レスポンス形式の統一
+   - フィールド名の完全一致
+
+2. **フロントエンド実装の確認**
+   ```javascript
+   // 正しいインポート例
+   import { listMessages } from '../graphql/queries';
+   import { postMessage, analyzeMessageSentimentMutation } from '../graphql/mutations';
+   
+   // パラメータの整合性確認
+   const result = await client.graphql({
+     query: analyzeMessageSentimentMutation,
+     variables: {
+       messageId,    // スキーマ: messageId: ID!
+       text: messageText  // スキーマ: text: String!
+     }
+   });
+   ```
+
+3. **バックエンド設定の確認**
+   ```hcl
+   # resolvers.tf - 設定例
+   resource "aws_appsync_resolver" "analyze_message_sentiment" {
+     api_id      = aws_appsync_graphql_api.chat_api.id
+     field       = "analyzeMessageSentiment"  # スキーマのフィールド名と一致
+     type        = "Mutation"                 # 正しいオペレーション型
+     data_source = aws_appsync_datasource.lambda_sentiment.name
+   }
+   ```
+
+### 🚨 よくあるエラーと対処法
+
+1. **インポート文の間違い**
+   - ❌ QueryとMutationの混在
+   - ✅ 適切なファイルからのインポート
+
+2. **パラメータ名の不一致**
+   - ❌ フロントエンド: `messageText` → バックエンド: `text`
+   - ✅ 統一された命名規則の使用
+
+3. **必須フィールドの欠如**
+   - ❌ `text: String` → `text: String!`
+   - ✅ 必須フィールドの正しい定義
+
+### 📝 整合性確認チェックリスト
+
+- [ ] GraphQLスキーマ定義完了
+- [ ] フロントエンドGraphQL操作定義完了
+- [ ] バックエンドResolver設定完了
+- [ ] パラメータ名・型の完全一致確認
+- [ ] レスポンス形式の統一確認
+- [ ] インポート文の正確性確認
+- [ ] エラーハンドリング実装完了
+
+## �💡 次のステップ
 
 1. **基本的なCRUD操作をマスター**
    - まずは简単な機能から始める

@@ -60,6 +60,10 @@ type Mutation {
   # 新しいメッセージを投稿する操作
   # roomId（どのルームか）とtext（メッセージ内容）を受け取って、Message型のデータを返す
   postMessage(roomId: ID!, text: String!): Message
+  
+  # 🤖 メッセージの感情分析を実行する操作（Lambda リゾルバー使用）
+  # messageId（メッセージID）とtext（分析対象テキスト）を受け取って、感情分析結果を返す
+  analyzeMessageSentiment(messageId: ID!, text: String!): SentimentAnalysis
 }
 
 # Query: データを取得する操作の定義
@@ -78,10 +82,6 @@ type Query {
   # 特定のルームのメッセージ一覧を取得
   # roomId（ルームID）と limit（取得件数、任意）を受け取って、Message型の配列を返す
   listMessages(roomId: ID!, limit: Int): [Message]
-  
-  # メッセージの感情分析を実行（Lambda リゾルバー使用）
-  # messageId（メッセージID）を受け取って、感情分析結果を返す
-  analyzeMessageSentiment(messageId: ID!): SentimentAnalysis
 }
 
 # Subscription: リアルタイム通知の定義

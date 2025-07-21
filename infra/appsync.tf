@@ -141,3 +141,54 @@ resource "aws_iam_role_policy" "appsync_dynamodb" {
     ]
   })
 }
+
+# 🤖 AppSync Lambda データソース (AI感情分析用)
+resource "aws_appsync_datasource" "lambda_sentiment" {
+  api_id           = aws_appsync_graphql_api.chat_api.id
+  name             = "LambdaSentimentDataSource"
+  service_role_arn = aws_iam_role.appsync_lambda.arn
+  type             = "AWS_LAMBDA"
+
+  lambda_config {
+    function_arn = aws_lambda_function.sentiment_analysis.arn
+  }
+}
+
+# 🤖 AppSync Lambda用IAMロール
+resource "aws_iam_role" "appsync_lambda" {
+  name = "${var.project_name}-appsync-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "appsync.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# 🤖 AppSync Lambda呼び出し権限
+resource "aws_iam_role_policy" "appsync_lambda" {
+  name = "${var.project_name}-appsync-lambda-policy"
+  role = aws_iam_role.appsync_lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = [
+          aws_lambda_function.sentiment_analysis.arn
+        ]
+      }
+    ]
+  })
+}

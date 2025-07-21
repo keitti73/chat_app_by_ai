@@ -12,6 +12,7 @@
 
 ### ✅ 実装済み改善
 - **パイプラインリゾルバー連携**: myActiveRooms最適化対応
+- **AI感情分析統合**: AWS Comprehend Lambda リゾルバー
 - **ES Modules対応**: package.json "type": "module"設定
 - **型安全性向上**: GraphQL型定義の厳密化
 - **パフォーマンス最適化**: N+1問題解決
@@ -37,17 +38,43 @@ graphql/
 flowchart LR
     subgraph "フロントエンド"
         Components[React Components]
+        AIFeatures[🤖 AI感情分析UI]
     end
     
     subgraph "GraphQL Client"
         Queries[queries.js]
         Mutations[mutations.js] 
         Subscriptions[subscriptions.js]
+        AIQueries[🤖 AI分析クエリ]
     end
     
     subgraph "AWS AppSync"
         Schema[GraphQL Schema]
         Resolvers[JavaScript Resolvers]
+        LambdaResolvers[🤖 Lambda Resolvers]
+    end
+    
+    subgraph "AI Services"
+        Lambda[Lambda Function]
+        Comprehend[AWS Comprehend]
+    end
+    
+    Components --> Queries
+    Components --> Mutations
+    Components --> Subscriptions
+    AIFeatures --> AIQueries
+    
+    Queries --> Schema
+    Mutations --> Schema
+    Subscriptions --> Schema
+    AIQueries --> Schema
+    
+    Schema --> Resolvers
+    Schema --> LambdaResolvers
+    
+    LambdaResolvers --> Lambda
+    Lambda --> Comprehend
+```
     end
     
     subgraph "データストア"
@@ -147,6 +174,36 @@ export const listMessages = `
 `;
 ```
 
+##### 🤖 AI感情分析クエリ
+```javascript
+// メッセージの感情分析実行
+export const analyzeMessageSentiment = `
+  query AnalyzeMessageSentiment($messageId: ID!) {
+    analyzeMessageSentiment(messageId: $messageId) {
+      messageId                # 分析対象のメッセージID
+      sentiment                # 主要感情（POSITIVE, NEGATIVE, NEUTRAL, MIXED）
+      sentimentScore {         # 感情スコアの詳細
+        positive               # ポジティブ感情スコア（0.0-1.0）
+        negative               # ネガティブ感情スコア（0.0-1.0）
+        neutral                # 中立感情スコア（0.0-1.0）
+        mixed                  # 混合感情スコア（0.0-1.0）
+      }
+      language                 # 検出された言語コード（ja, en等）
+      languageConfidence       # 言語検出の信頼度（0.0-1.0）
+      isAppropriate           # 適切なコンテンツかどうか
+      moderationFlags         # 不適切コンテンツのフラグ一覧
+      analyzedAt              # 分析実行日時
+    }
+  }
+`;
+```
+
+> 🤖 **Lambda リゾルバー**: `analyzeMessageSentiment`はAWS Comprehendを使用
+> - **言語検出**: 自動言語判定による最適化
+> - **感情分析**: 4種類の感情（POSITIVE/NEGATIVE/NEUTRAL/MIXED）
+> - **信頼度スコア**: 各感情の確信度（0.0-1.0）
+> - **コンテンツ安全性**: 不適切コンテンツの自動検出
+
 #### 🔍 **使用例**
 ```javascript
 import { generateClient } from 'aws-amplify/api';
@@ -239,8 +296,38 @@ export const postMessage = `
     }
   }
 `;
+```
 
-// メッセージ編集
+##### 🤖 AI感情分析ミューテーション
+```javascript
+// メッセージの感情分析実行
+export const analyzeMessageSentimentMutation = `
+  mutation AnalyzeMessageSentiment($messageId: ID!, $text: String!) {
+    analyzeMessageSentiment(messageId: $messageId, text: $text) {
+      messageId                # 分析対象のメッセージID
+      sentiment                # 主要感情（POSITIVE, NEGATIVE, NEUTRAL, MIXED）
+      sentimentScore {         # 感情スコアの詳細
+        positive               # ポジティブ感情スコア（0.0-1.0）
+        negative               # ネガティブ感情スコア（0.0-1.0）
+        neutral                # 中立感情スコア（0.0-1.0）
+        mixed                  # 混合感情スコア（0.0-1.0）
+      }
+      language                 # 検出された言語コード（ja, en等）
+      languageConfidence       # 言語検出の信頼度（0.0-1.0）
+      isAppropriate           # 適切なコンテンツかどうか
+      moderationFlags         # 不適切コンテンツのフラグ一覧
+      analyzedAt              # 分析実行日時
+    }
+  }
+`;
+```
+
+> 🤖 **AI処理フロー**: Lambda関数がAWS Comprehendと連携
+> 1. **入力検証**: テキスト長・形式チェック
+> 2. **言語検出**: 自動言語判定
+> 3. **感情分析**: 多次元感情スコア算出
+> 4. **結果保存**: DynamDBにキャッシュ保存
+> 5. **レスポンス**: 構造化された分析結果を返却
 export const updateMessage = `
   mutation UpdateMessage($id: ID!, $text: String!) {
     updateMessage(id: $id, text: $text) {

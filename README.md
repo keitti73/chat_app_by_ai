@@ -16,7 +16,17 @@
 │       ├── terraform-template.md            # Terraformテンプレート
 │       ├── javascript-resolver-basic-template.md      # 基本CRUD操作
 │       ├── javascript-resolver-advanced-template.md   # 高度なクエリ・統計
-│       ├── javascript-resolver-template.md            # 完全版（参考用）
+│       ├── javascript-resolver-template.md         ### 🧪 開発効率向上 {#typescript-migration}
+- [x] 🔍 **コード品質**: ESLint導入による継続的品質保証 ✅ **完了！**
+- [x] 📚 **ドキュメント体系化**: テンプレートファイルの機能別分割・スキルレベル別整理 ✅ **完了！**
+- [x] 🤖 **AI機能統合**: Lambda + Comprehend による感情分析システム ✅ **完了！**
+- [x] 🎨 **フロントエンドAI統合**: React UIでのリアルタイム感情分析表示 ✅ **完了！**
+- [x] 🔧 **バックエンド統合**: AppSync Lambda Resolver + DynamoDB連携 ✅ **完了！**
+- [x] 📊 **AI分析機能**: 4種類感情分類・25言語対応・コンテンツモデレーション ✅ **完了！**
+- [ ] 🔤 **TypeScript導入**: GraphQL Code Generator による型安全性
+- [ ] 🧪 **テスト自動化**: Jest + React Testing Library
+- [ ] 🎭 **E2Eテスト**: Playwright + モックAPI
+- [ ] 📱 **モバイル対応**: React Native + Expo による統合開発全版（参考用）
 │       ├── lambda-resolver-template.md                 # 🤖 Lambdaリゾルバパターン（🆕）
 │       ├── react-graphql-template.md                  # GraphQL操作専用
 │       ├── react-components-template.md               # UIコンポーネント専用
@@ -59,14 +69,15 @@ type SentimentScore {
 type Query {
   myOwnedRooms: [Room]     # 自分が作ったルーム一覧
   myActiveRooms: [Room]    # 参加中のルーム一覧
+  getRoom(id: ID!): Room   # 特定のルーム詳細取得
   listMessages(roomId: ID!, limit: Int): [Message]  # メッセージ履歴
-  # 🤖 AI機能（Lambda）
-  analyzeMessageSentiment(messageId: ID!): SentimentAnalysis  # 感情分析
 }
 
 type Mutation {
   createRoom(name: String!): Room           # ルーム作成
   postMessage(roomId: ID!, text: String!): Message  # メッセージ送信
+  # 🤖 AI機能（Lambda）
+  analyzeMessageSentiment(messageId: ID!, text: String!): SentimentAnalysis  # 感情分析実行
 }
 
 # リアルタイム通知
@@ -80,7 +91,8 @@ type Subscription {
 - **[GraphQLスキーマ初心者ガイド](./doc/guides/GraphQLスキーマ初心者ガイド.md)** - 身近な例で理解
 - **[GraphQLスキーマ設計書](./doc/design/GraphQLスキーマ設計書.md)** - 技術仕様詳細
 - **[GraphQLクエリ実践ガイド](./doc/guides/GraphQLクエリ実践ガイド.md)** - 実装方法
-- **[Lambda機能ガイド](./doc/guides/Lambda機能ガイド.md)** - 🆕 AI感情分析機能の詳細
+- **[Lambda機能ガイド](./doc/guides/Lambda機能ガイド.md)** - 🤖 AI感情分析機能の詳細
+- **[フロントエンドAI機能ガイド](./doc/guides/フロントエンドAI機能ガイド.md)** - 🎨 React AI統合詳細
 
 ### データフロー図eact（Amplify）で実装する**Slack風リアルタイムチャットアプリ**の学習用リポジトリです。
 
@@ -127,6 +139,7 @@ type Subscription {
 - 🤖 **AI感情分析**: メッセージの感情を自動解析（ポジティブ/ネガティブ/中立/混合）
 - 🌍 **多言語対応**: 25以上の言語でのメッセージ言語自動検出
 - 🛡️ **コンテンツ安全性**: 不適切なメッセージの自動検出と警告
+- 📊 **感情可視化**: リアルタイム感情スコア表示とカラーコーディング
 
 ## 🔧 技術スタック
 
@@ -138,6 +151,7 @@ type Subscription {
 - **IaC**: Terraform（Infrastructure as Code）
 - **コード品質**: ESLint v9 + React プラグイン
 - **CI/CD**: GitHub Actions等（自動デプロイ可能）
+- **AI統合**: リアルタイム感情分析・多言語サポート・コンテンツモデレーション
 
 ## ✨ プロジェクトの特徴
 
@@ -151,11 +165,19 @@ type Subscription {
 - ✅ **パイプラインリゾルバー**: 効率的なDynamoDBデータ取得
 - ✅ **バッチ処理**: 複数テーブルからの情報を一括取得
 - ✅ **リアルタイム通信**: WebSocketベースの低遅延メッセージング
+- ✅ **AI処理最適化**: Lambda並列処理・結果キャッシュ
 
 ### 🔒 セキュリティ強化
 - ✅ **JWT認証**: Cognito User Poolsによる安全な認証
 - ✅ **権限制御**: きめ細かいAPI アクセス制御
 - ✅ **入力検証**: サーバーサイドでのデータバリデーション
+- ✅ **コンテンツ安全性**: AI によるコンテンツモデレーション
+
+### 🤖 AI機能統合
+- ✅ **感情分析**: リアルタイム感情解析とスコア表示
+- ✅ **多言語対応**: 25以上の言語での自動言語検出
+- ✅ **コンテンツモデレーション**: 不適切コンテンツの自動検出
+- ✅ **Lambda統合**: 高度なAI処理ロジックの実装
 
 ## 🏗️ システムアーキテクチャ
 
@@ -168,7 +190,7 @@ flowchart TB
     end
     
     subgraph Frontend["⚛️ Frontend Tier"]
-        React["React SPA"]
+        React["React SPA<br/>🤖 AI感情分析UI"]
         Vite["Vite Dev Server"]
         Amplify["AWS Amplify"]
     end
@@ -176,7 +198,7 @@ flowchart TB
     subgraph Backend["☁️ Backend Tier"]
         AppSync["AppSync GraphQL API"]
         JSResolvers["JavaScript Resolvers"]
-        LambdaResolvers["🤖 Lambda Resolvers"]
+        LambdaResolvers["🤖 Lambda Resolvers<br/>感情分析・AI処理"]
     end
     
     subgraph AIServices["🤖 AI Services"]
@@ -191,11 +213,21 @@ flowchart TB
     subgraph Data["🗄️ Data Tier"]
         DynamoDB["DynamoDB"]
         GSI["Global Secondary Indexes"]
-        SentimentTable["Sentiment Analysis Table"]
+        SentimentTable["🤖 Sentiment Analysis Table"]
     end
     
     Browser --> React
     React --> Amplify
+    Amplify --> AppSync
+    AppSync --> JSResolvers
+    AppSync --> LambdaResolvers
+    LambdaResolvers --> Lambda
+    Lambda --> Comprehend
+    React --> Cognito
+    JSResolvers --> DynamoDB
+    LambdaResolvers --> SentimentTable
+    DynamoDB --> GSI
+```
     Amplify --> AppSync
     AppSync --> Cognito
     AppSync --> JSResolvers
@@ -347,7 +379,8 @@ npm run dev
 │   │   ├── API追加テンプレート.md   # クイックスタートガイド
 │   │   ├── GraphQLスキーマ初心者ガイド.md  # GraphQL基礎解説（🆕）
 │   │   ├── GraphQLクエリ実践ガイド.md      # 実装コード実践（🆕）
-│   │   └── Lambda機能ガイド.md             # 🤖 AI感情分析機能詳細（🆕）
+│   │   ├── Lambda機能ガイド.md             # 🤖 AI感情分析機能詳細（🆕）
+│   │   └── フロントエンドAI機能ガイド.md    # 🎨 React AI統合ガイド（🆕）
 │   └── templates/                 # � 実装テンプレート集
 │       ├── README.md              # テンプレート使用ガイド・一覧
 │       ├── graphql-schema-template.md       # GraphQLスキーマ設計
@@ -394,9 +427,6 @@ npm run dev
 │   ├── Pipeline_myActiveRooms_1_getMessages.js  # パイプライン1段目
 │   ├── Pipeline_myActiveRooms_2_getRooms.js     # パイプライン2段目
 │   └── Lambda_analyzeMessageSentiment.js        # 🤖 AI感情分析処理（🆕）
-│   ├── Query_myActiveRooms.js        # 参加中ルーム一覧（単体版）
-│   ├── Pipeline_myActiveRooms_1_getMessages.js  # パイプライン第1段階
-│   └── Pipeline_myActiveRooms_2_getRooms.js     # パイプライン第2段階
 ├── public/                        # 🌐 静的ファイル（アイコン等）
 ├── schema.graphql                 # 📝 データの設計図（GraphQLスキーマ）
 ├── deploy.sh                      # 🚀 自動デプロイスクリプト
