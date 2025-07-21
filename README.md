@@ -9,6 +9,8 @@
 - 👥 **複数人でチャット**: 同じルームにいる人全員でおしゃべり
 - 📋 **ルーム一覧**: 自分が作ったルームや参加したルームを一覧表示
 - ⏰ **メッセージ履歴**: 過去のメッセージもちゃんと見れる
+- 🔐 **安全なログイン**: メールアドレスとパスワードで安全にログイン
+- 🆕 **ユーザー登録**: 新しくアカウントを作成して利用開始
 
 ## 🔧 使っている技術（中学生向け説明）
 
@@ -17,7 +19,7 @@
 - 🗄️ **Amazon DynamoDB**: Amazon のデータベース（メッセージやルーム情報を保存）
 - ⚡ **GraphQL Subscriptions**: リアルタイム通信の仕組み（新着メッセージを瞬時に通知）
 - 🏗️ **Terraform**: コードでAWSのサービスを自動で作る技術
-- 🔐 **API Key認証**: 簡単な認証方式（将来はもっと高度な認証も予定）
+- 🔐 **Amazon Cognito**: 安全なユーザー認証システム（ログイン・新規登録・パスワード管理）
 
 ## 🚀 アプリを動かしてみよう！
 
@@ -60,7 +62,8 @@ npm run dev
 ├── src/                           # 📱 アプリの画面とロジック
 │   ├── components/                # 🧩 画面の部品たち
 │   │   ├── MyRooms.jsx           # 🏠 ルーム一覧画面
-│   │   └── ChatRoom.jsx          # 💬 チャット画面
+│   │   ├── ChatRoom.jsx          # 💬 チャット画面
+│   │   └── AuthForm.jsx          # 🔐 ログイン・新規登録画面
 │   ├── graphql/                   # 📡 サーバーとの通信設定
 │   │   ├── queries.js            # 📖 データを「読む」ための命令
 │   │   ├── mutations.js          # ✏️ データを「変更する」ための命令
@@ -71,6 +74,7 @@ npm run dev
 │   ├── main.tf                   # ⚙️ 基本設定
 │   ├── dynamodb.tf               # 🗄️ データベースの設定
 │   ├── appsync.tf                # 📡 API サーバーの設定
+│   ├── cognito.tf                # 🔐 ユーザー認証の設定
 │   ├── resolvers.tf              # 🔄 データ処理ロジックの設定
 │   └── outputs.tf                # 📋 作成したサービスの情報出力
 ├── resolvers/                     # 🧠 サーバー側のデータ処理ロジック
@@ -93,14 +97,30 @@ npm run dev
 - 🗄️ **データベース**: Amazon DynamoDB（NoSQL データベース）
 - ⚡ **リアルタイム**: GraphQL Subscriptions（WebSocket ベースの通信）
 - 🏗️ **インフラ**: Terraform（Infrastructure as Code）
-- 🔐 **認証**: Amazon API Key（シンプル認証、将来は Cognito 予定）
+- 🔐 **認証**: Amazon Cognito（高度なユーザー認証・管理システム）
 
 ## 🔧 開発時の注意点（重要！）
 
 1. 🔑 **AWS認証情報**: AWS CLIで自分のAWSアカウント情報を設定してください
 2. 📝 **環境変数**: `.env.example`をコピーして`.env`ファイルを作成し、Terraform outputの値を設定してください
-3. 🔐 **API認証**: 現在はAPI Keyを使用しています（本番環境ではCognitoを推奨）
+3. 🔐 **Cognito認証**: 本格的なユーザー認証システムを実装済み（メール認証付き）
 4. 🔒 **機密情報**: `.env`ファイルや`terraform.tfvars`などの機密情報は`.gitignore`で除外されています
+
+## 🆕 Cognito認証の使い方
+
+### 👤 新規ユーザー登録
+1. アプリにアクセスすると「新規登録」ボタンをクリック
+2. 名前、メールアドレス、パスワードを入力
+3. 登録したメールアドレスに確認コードが送信される
+4. 確認コードを入力してアカウントを有効化
+
+### 🔑 ログイン
+1. メールアドレスとパスワードを入力
+2. 「ログイン」ボタンをクリック
+3. 成功するとチャットアプリが利用可能
+
+### 🚪 ログアウト
+- 画面右上の「ログアウト」ボタンをクリック
 
 ## 🚀 詳細なデプロイ手順
 
@@ -124,7 +144,10 @@ Terraform outputから出力される値を`.env`ファイルに設定:
 cp .env.example .env
 
 # .envファイルを開いて、ステップ2で表示された値を入力
-# 例: VITE_APPSYNC_GRAPHQL_ENDPOINT=https://xxxxxxxxx.appsync-api.us-east-1.amazonaws.com/graphql
+# 🆕 Cognito認証に必要な値も含まれています：
+# - VITE_COGNITO_USER_POOL_ID=us-east-1_xxxxxxxxx
+# - VITE_COGNITO_USER_POOL_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxx
+# - VITE_COGNITO_IDENTITY_POOL_ID=us-east-1:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
 
 ### ステップ4: アプリケーションの起動
@@ -147,7 +170,7 @@ npm run dev
 
 ## 📝 今後の改善予定（TODO）
 
-- [ ] 🔐 **Cognito認証の実装**: より安全なユーザー認証システム
+- [x] 🔐 **Cognito認証の実装**: より安全なユーザー認証システム ✅ **完了！**
 - [ ] 🛡️ **エラーハンドリングの改善**: エラーが起きた時の対応を充実
 - [ ] 🎨 **UI/UXの向上**: より使いやすく美しいデザイン
 - [ ] 🧪 **テストの追加**: アプリが正しく動くかを自動でチェック
@@ -155,6 +178,7 @@ npm run dev
 - [ ] 📎 **ファイル添付機能**: 画像や動画を送れるように
 - [ ] 😊 **絵文字・スタンプ**: チャットをもっと楽しく
 - [ ] 🔒 **プライベートルーム**: パスワード付きのルーム機能
+- [ ] 👥 **ユーザープロフィール**: アバター画像やステータスメッセージ
 
 ## 🆘 困った時は
 

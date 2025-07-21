@@ -1,8 +1,20 @@
 # AppSync GraphQL API
 resource "aws_appsync_graphql_api" "chat_api" {
-  authentication_type = "API_KEY"
+  authentication_type = "AMAZON_COGNITO_USER_POOLS"
   name                = "${var.project_name}-api"
   schema              = file("${path.module}/../schema.graphql")
+
+  # Cognito認証設定
+  user_pool_config {
+    aws_region        = var.aws_region
+    default_action    = "ALLOW"
+    user_pool_id     = aws_cognito_user_pool.chat_user_pool.id
+  }
+
+  # 追加認証プロバイダー（API Key も併用可能）
+  additional_authentication_provider {
+    authentication_type = "API_KEY"
+  }
 
   log_config {
     cloudwatch_logs_role_arn = aws_iam_role.appsync_logs.arn
