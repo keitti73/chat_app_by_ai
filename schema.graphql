@@ -1,0 +1,37 @@
+# Message型: チャットメッセージ
+type Message {
+  id: ID!
+  text: String!
+  user: String!
+  createdAt: AWSDateTime!
+  roomId: ID!
+}
+
+# Room型: チャットルーム
+type Room {
+  id: ID!
+  name: String!
+  owner: String!
+  createdAt: AWSDateTime!
+  messages: [Message]
+}
+
+# Mutation: 投稿・ルーム作成
+type Mutation {
+  createRoom(name: String!): Room
+  postMessage(roomId: ID!, text: String!): Message
+}
+
+# Query: 取得系
+type Query {
+  myOwnedRooms: [Room]
+  myActiveRooms: [Room]
+  getRoom(id: ID!): Room
+  listMessages(roomId: ID!, limit: Int): [Message]
+}
+
+# Subscription: リアルタイム受信
+type Subscription {
+  onRoomCreated: Room @aws_subscribe(mutations: ["createRoom"])
+  onMessagePosted(roomId: ID!): Message @aws_subscribe(mutations: ["postMessage"])
+}
