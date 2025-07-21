@@ -1,6 +1,7 @@
 # ⚛️ React フロントエンドテンプレート
 
 このファイルには、AWS AppSync と連携するReactコンポーネントのテンプレートが含まれています。
+**AWS Amplify v6** の `generateClient` を使用した実装例です。
 
 ## 📡 GraphQL操作定義テンプレート
 
@@ -10,12 +11,11 @@
 /**
  * 📖 GraphQLクエリ定義
  * データ取得用のクエリを定義します
+ * AWS Amplify v6 の generateClient で使用
  */
 
-import { gql } from '@apollo/client';
-
 // 🔍 単一エンティティ取得
-export const GET_ENTITY = gql`
+export const getEntity = /* GraphQL */ `
   query GetEntity($id: ID!) {
     getEntity(id: $id) {
       id                    # エンティティID
@@ -41,27 +41,23 @@ export const GET_ENTITY = gql`
 `;
 
 // 📋 エンティティ一覧取得
-export const LIST_ENTITIES = gql`
+export const listEntities = /* GraphQL */ `
   query ListEntities($userId: String, $status: EntityStatus, $limit: Int, $nextToken: String) {
     listEntities(userId: $userId, status: $status, limit: $limit, nextToken: $nextToken) {
-      items {
-        id
-        name
-        description
-        status
-        userId
-        createdAt
-        updatedAt
-        itemCount
-      }
-      nextToken             # 次ページのトークン
-      total                 # 総件数
+      id
+      name
+      description
+      status
+      userId
+      createdAt
+      updatedAt
+      itemCount
     }
   }
 `;
 
 // 🔍 ユーザー別エンティティ取得
-export const LIST_ENTITIES_BY_USER = gql`
+export const listEntitiesByUser = /* GraphQL */ `
   query ListEntitiesByUser($userId: String!, $limit: Int, $nextToken: String) {
     listEntitiesByUser(userId: $userId, limit: $limit, nextToken: $nextToken) {
       id
@@ -75,7 +71,7 @@ export const LIST_ENTITIES_BY_USER = gql`
 `;
 
 // 🔍 検索クエリ
-export const SEARCH_ENTITIES = gql`
+export const searchEntities = /* GraphQL */ `
   query SearchEntities($keyword: String!, $limit: Int) {
     searchEntities(keyword: $keyword, limit: $limit) {
       id
@@ -89,7 +85,7 @@ export const SEARCH_ENTITIES = gql`
 `;
 
 // 📊 統計データ取得
-export const GET_ENTITY_STATS = gql`
+export const getEntityStats = /* GraphQL */ `
   query GetEntityStats($userId: String) {
     getEntityStats(userId: $userId) {
       total                 # 総数
@@ -112,12 +108,11 @@ export const GET_ENTITY_STATS = gql`
 /**
  * ✏️ GraphQLミューテーション定義
  * データ変更用のミューテーションを定義します
+ * AWS Amplify v6 の generateClient で使用
  */
 
-import { gql } from '@apollo/client';
-
 // 📝 エンティティ作成
-export const CREATE_ENTITY = gql`
+export const createEntity = /* GraphQL */ `
   mutation CreateEntity($input: CreateEntityInput!) {
     createEntity(input: $input) {
       id                    # 作成されたエンティティのID
@@ -133,7 +128,7 @@ export const CREATE_ENTITY = gql`
 `;
 
 // ✏️ エンティティ更新
-export const UPDATE_ENTITY = gql`
+export const updateEntity = /* GraphQL */ `
   mutation UpdateEntity($input: UpdateEntityInput!) {
     updateEntity(input: $input) {
       id                    # 更新されたエンティティのID
@@ -149,7 +144,7 @@ export const UPDATE_ENTITY = gql`
 `;
 
 // 🗑️ エンティティ削除
-export const DELETE_ENTITY = gql`
+export const deleteEntity = /* GraphQL */ `
   mutation DeleteEntity($id: ID!) {
     deleteEntity(id: $id) {
       id                    # 削除されたエンティティのID
@@ -160,7 +155,7 @@ export const DELETE_ENTITY = gql`
 `;
 
 // 🔄 ステータス変更
-export const ACTIVATE_ENTITY = gql`
+export const activateEntity = /* GraphQL */ `
   mutation ActivateEntity($id: ID!) {
     activateEntity(id: $id) {
       id
@@ -171,7 +166,7 @@ export const ACTIVATE_ENTITY = gql`
   }
 `;
 
-export const DEACTIVATE_ENTITY = gql`
+export const deactivateEntity = /* GraphQL */ `
   mutation DeactivateEntity($id: ID!) {
     deactivateEntity(id: $id) {
       id
@@ -183,7 +178,7 @@ export const DEACTIVATE_ENTITY = gql`
 `;
 
 // 📎 関連付け操作
-export const ADD_ENTITY_TO_USER = gql`
+export const addEntityToUser = /* GraphQL */ `
   mutation AddEntityToUser($entityId: ID!, $userId: String!) {
     addEntityToUser(entityId: $entityId, userId: $userId) {
       id
@@ -201,12 +196,11 @@ export const ADD_ENTITY_TO_USER = gql`
 /**
  * 🔔 GraphQLサブスクリプション定義
  * リアルタイム通知用のサブスクリプションを定義します
+ * AWS Amplify v6 の generateClient で使用
  */
 
-import { gql } from '@apollo/client';
-
 // 🆕 エンティティ作成通知
-export const ON_ENTITY_CREATED = gql`
+export const onEntityCreated = /* GraphQL */ `
   subscription OnEntityCreated($userId: String) {
     onEntityCreated(userId: $userId) {
       id                    # 新しく作成されたエンティティのID
@@ -220,7 +214,7 @@ export const ON_ENTITY_CREATED = gql`
 `;
 
 // ✏️ エンティティ更新通知
-export const ON_ENTITY_UPDATED = gql`
+export const onEntityUpdated = /* GraphQL */ `
   subscription OnEntityUpdated($entityId: ID) {
     onEntityUpdated(entityId: $entityId) {
       id                    # 更新されたエンティティのID
@@ -234,7 +228,7 @@ export const ON_ENTITY_UPDATED = gql`
 `;
 
 // 🗑️ エンティティ削除通知
-export const ON_ENTITY_DELETED = gql`
+export const onEntityDeleted = /* GraphQL */ `
   subscription OnEntityDeleted($userId: String) {
     onEntityDeleted(userId: $userId) {
       id                    # 削除されたエンティティのID
@@ -245,7 +239,7 @@ export const ON_ENTITY_DELETED = gql`
 `;
 
 // 🔄 ステータス変更通知
-export const ON_ENTITY_STATUS_CHANGED = gql`
+export const onEntityStatusChanged = /* GraphQL */ `
   subscription OnEntityStatusChanged($entityId: ID) {
     onEntityStatusChanged(entityId: $entityId) {
       id                    # エンティティID
@@ -257,7 +251,7 @@ export const ON_ENTITY_STATUS_CHANGED = gql`
 `;
 
 // 👤 ユーザー固有の変更通知
-export const ON_USER_ENTITY_CHANGED = gql`
+export const onUserEntityChanged = /* GraphQL */ `
   subscription OnUserEntityChanged($userId: String!) {
     onUserEntityChanged(userId: $userId) {
       id                    # 変更されたエンティティのID
@@ -278,28 +272,31 @@ export const ON_USER_ENTITY_CHANGED = gql`
 /**
  * 📋 エンティティ一覧コンポーネント
  * エンティティの一覧表示と基本的な操作を提供します
+ * AWS Amplify v6 generateClient 使用
  */
 
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useSubscription } from '@apollo/client';
+import { generateClient } from 'aws-amplify/api';
 import { 
-  LIST_ENTITIES, 
-  LIST_ENTITIES_BY_USER,
-  GET_ENTITY_STATS 
+  listEntities, 
+  listEntitiesByUser,
+  getEntityStats 
 } from '../graphql/queries';
 import { 
-  DELETE_ENTITY, 
-  ACTIVATE_ENTITY, 
-  DEACTIVATE_ENTITY 
+  deleteEntity, 
+  activateEntity, 
+  deactivateEntity 
 } from '../graphql/mutations';
 import { 
-  ON_ENTITY_CREATED, 
-  ON_ENTITY_UPDATED, 
-  ON_ENTITY_DELETED 
+  onEntityCreated, 
+  onEntityUpdated, 
+  onEntityDeleted 
 } from '../graphql/subscriptions';
 import EntityCard from './EntityCard';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
+
+const client = generateClient();
 
 function EntityList({ userId, showOnlyUserEntities = false, currentUser }) {
   // 🔹 状態管理
@@ -308,155 +305,117 @@ function EntityList({ userId, showOnlyUserEntities = false, currentUser }) {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [stats, setStats] = useState(null);
 
-  // 🔹 GraphQLクエリの実行
-  const { 
-    data: entitiesData, 
-    loading: entitiesLoading, 
-    error: entitiesError,
-    refetch: refetchEntities,
-    fetchMore
-  } = useQuery(
-    showOnlyUserEntities ? LIST_ENTITIES_BY_USER : LIST_ENTITIES, 
-    {
-      variables: {
+  // 🔹 エンティティ一覧の取得
+  const fetchEntities = async () => {
+    try {
+      setIsLoading(true);
+      const variables = {
         ...(showOnlyUserEntities && { userId }),
         ...(filter !== 'ALL' && { status: filter }),
         limit: 20
-      },
-      // キャッシュポリシー
-      fetchPolicy: 'cache-and-network',
-      // エラーポリシー
-      errorPolicy: 'all'
-    }
-  );
+      };
 
-  // 🔹 統計データの取得
-  const { 
-    data: statsData, 
-    loading: statsLoading 
-  } = useQuery(GET_ENTITY_STATS, {
-    variables: showOnlyUserEntities ? { userId } : {},
-    fetchPolicy: 'cache-first'
-  });
-
-  // 🔹 ミューテーションの準備
-  const [deleteEntity] = useMutation(DELETE_ENTITY, {
-    // 削除後の処理
-    update(cache, { data: { deleteEntity } }) {
-      // キャッシュから削除されたエンティティを除去
-      const existingEntities = cache.readQuery({
-        query: showOnlyUserEntities ? LIST_ENTITIES_BY_USER : LIST_ENTITIES,
-        variables: {
-          ...(showOnlyUserEntities && { userId }),
-          ...(filter !== 'ALL' && { status: filter })
-        }
+      const result = await client.graphql({
+        query: showOnlyUserEntities ? listEntitiesByUser : listEntities,
+        variables
       });
 
-      if (existingEntities) {
-        cache.writeQuery({
-          query: showOnlyUserEntities ? LIST_ENTITIES_BY_USER : LIST_ENTITIES,
-          variables: {
-            ...(showOnlyUserEntities && { userId }),
-            ...(filter !== 'ALL' && { status: filter })
-          },
-          data: {
-            [showOnlyUserEntities ? 'listEntitiesByUser' : 'listEntities']: {
-              ...existingEntities[showOnlyUserEntities ? 'listEntitiesByUser' : 'listEntities'],
-              items: existingEntities[showOnlyUserEntities ? 'listEntitiesByUser' : 'listEntities'].items
-                .filter(entity => entity.id !== deleteEntity.id)
-            }
-          }
-        });
-      }
-    },
-    // エラーハンドリング
-    onError: (error) => {
-      console.error('エンティティ削除エラー:', error);
-      setError('エンティティの削除に失敗しました');
-    }
-  });
-
-  const [activateEntity] = useMutation(ACTIVATE_ENTITY, {
-    onError: (error) => {
-      console.error('エンティティ有効化エラー:', error);
-      setError('エンティティの有効化に失敗しました');
-    }
-  });
-
-  const [deactivateEntity] = useMutation(DEACTIVATE_ENTITY, {
-    onError: (error) => {
-      console.error('エンティティ無効化エラー:', error);
-      setError('エンティティの無効化に失敗しました');
-    }
-  });
-
-  // 🔹 リアルタイム通知の受信
-  useSubscription(ON_ENTITY_CREATED, {
-    variables: showOnlyUserEntities ? { userId } : {},
-    onSubscriptionData: ({ subscriptionData }) => {
-      console.log('新しいエンティティが作成されました:', subscriptionData.data);
-      
-      // 新しいエンティティを一覧に追加
-      const newEntity = subscriptionData.data.onEntityCreated;
-      setEntities(prev => [newEntity, ...prev]);
-    }
-  });
-
-  useSubscription(ON_ENTITY_UPDATED, {
-    onSubscriptionData: ({ subscriptionData }) => {
-      console.log('エンティティが更新されました:', subscriptionData.data);
-      
-      // 更新されたエンティティを一覧で更新
-      const updatedEntity = subscriptionData.data.onEntityUpdated;
-      setEntities(prev => 
-        prev.map(entity => 
-          entity.id === updatedEntity.id ? { ...entity, ...updatedEntity } : entity
-        )
-      );
-    }
-  });
-
-  useSubscription(ON_ENTITY_DELETED, {
-    variables: showOnlyUserEntities ? { userId } : {},
-    onSubscriptionData: ({ subscriptionData }) => {
-      console.log('エンティティが削除されました:', subscriptionData.data);
-      
-      // 削除されたエンティティを一覧から除去
-      const deletedEntity = subscriptionData.data.onEntityDeleted;
-      setEntities(prev => prev.filter(entity => entity.id !== deletedEntity.id));
-    }
-  });
-
-  // 🔹 データ更新の処理
-  useEffect(() => {
-    if (entitiesData) {
       const items = showOnlyUserEntities 
-        ? entitiesData.listEntitiesByUser 
-        : entitiesData.listEntities?.items || entitiesData.listEntities;
+        ? result.data.listEntitiesByUser 
+        : result.data.listEntities;
       
       setEntities(Array.isArray(items) ? items : []);
-      setIsLoading(false);
-    }
-  }, [entitiesData, showOnlyUserEntities]);
-
-  // 🔹 エラー処理
-  useEffect(() => {
-    if (entitiesError) {
+    } catch (error) {
+      console.error('エンティティ取得エラー:', error);
       setError('エンティティの取得に失敗しました');
+    } finally {
       setIsLoading(false);
     }
-  }, [entitiesError]);
+  };
+
+  // 🔹 統計データの取得
+  const fetchStats = async () => {
+    try {
+      const variables = showOnlyUserEntities ? { userId } : {};
+      const result = await client.graphql({
+        query: getEntityStats,
+        variables
+      });
+      setStats(result.data.getEntityStats);
+    } catch (error) {
+      console.error('統計データ取得エラー:', error);
+    }
+  };
+
+  // 🔹 初期データ読み込み
+  useEffect(() => {
+    fetchEntities();
+    fetchStats();
+  }, [userId, showOnlyUserEntities, filter]);
+
+  // 🔹 リアルタイム通知の設定
+  useEffect(() => {
+    const subscriptions = [];
+
+    // 作成通知
+    const createSubscription = client.graphql({
+      query: onEntityCreated,
+      variables: showOnlyUserEntities ? { userId } : {}
+    }).subscribe({
+      next: ({ data }) => {
+        console.log('新しいエンティティが作成されました:', data);
+        const newEntity = data.onEntityCreated;
+        setEntities(prev => [newEntity, ...prev]);
+      },
+      error: (error) => console.error('作成通知エラー:', error)
+    });
+
+    // 更新通知
+    const updateSubscription = client.graphql({
+      query: onEntityUpdated
+    }).subscribe({
+      next: ({ data }) => {
+        console.log('エンティティが更新されました:', data);
+        const updatedEntity = data.onEntityUpdated;
+        setEntities(prev => 
+          prev.map(entity => 
+            entity.id === updatedEntity.id ? { ...entity, ...updatedEntity } : entity
+          )
+        );
+      },
+      error: (error) => console.error('更新通知エラー:', error)
+    });
+
+    // 削除通知
+    const deleteSubscription = client.graphql({
+      query: onEntityDeleted,
+      variables: showOnlyUserEntities ? { userId } : {}
+    }).subscribe({
+      next: ({ data }) => {
+        console.log('エンティティが削除されました:', data);
+        const deletedEntity = data.onEntityDeleted;
+        setEntities(prev => prev.filter(entity => entity.id !== deletedEntity.id));
+      },
+      error: (error) => console.error('削除通知エラー:', error)
+    });
+
+    subscriptions.push(createSubscription, updateSubscription, deleteSubscription);
+
+    // クリーンアップ
+    return () => {
+      subscriptions.forEach(subscription => subscription.unsubscribe());
+    };
+  }, [userId, showOnlyUserEntities]);
 
   // 🔹 フィルタリング処理
   const filteredEntities = entities.filter(entity => {
-    // 検索キーワードでフィルタ
     if (searchKeyword) {
       const keyword = searchKeyword.toLowerCase();
       return entity.name.toLowerCase().includes(keyword) ||
              (entity.description && entity.description.toLowerCase().includes(keyword));
     }
-    
     return true;
   });
 
@@ -464,53 +423,44 @@ function EntityList({ userId, showOnlyUserEntities = false, currentUser }) {
   const handleDelete = async (entityId) => {
     if (window.confirm('このエンティティを削除しますか？')) {
       try {
-        await deleteEntity({
+        await client.graphql({
+          query: deleteEntity,
           variables: { id: entityId }
         });
+        // リアルタイム通知で自動更新される
       } catch (error) {
         console.error('削除処理でエラー:', error);
+        setError('エンティティの削除に失敗しました');
       }
     }
   };
 
   const handleStatusToggle = async (entity) => {
     try {
-      if (entity.status === 'ACTIVE') {
-        await deactivateEntity({
-          variables: { id: entity.id }
-        });
-      } else {
-        await activateEntity({
-          variables: { id: entity.id }
-        });
-      }
+      const mutation = entity.status === 'ACTIVE' ? deactivateEntity : activateEntity;
+      await client.graphql({
+        query: mutation,
+        variables: { id: entity.id }
+      });
+      // リアルタイム通知で自動更新される
     } catch (error) {
       console.error('ステータス変更でエラー:', error);
-    }
-  };
-
-  const handleLoadMore = () => {
-    if (entitiesData?.listEntities?.nextToken) {
-      fetchMore({
-        variables: {
-          nextToken: entitiesData.listEntities.nextToken
-        }
-      });
+      setError('ステータスの変更に失敗しました');
     }
   };
 
   // 🔹 レンダリング
-  if (isLoading || entitiesLoading) {
+  if (isLoading) {
     return <LoadingSpinner message="エンティティを読み込み中..." />;
   }
 
-  if (error || entitiesError) {
+  if (error) {
     return (
       <ErrorMessage 
-        message={error || entitiesError.message} 
+        message={error} 
         onRetry={() => {
           setError(null);
-          refetchEntities();
+          fetchEntities();
         }}
       />
     );
@@ -519,24 +469,24 @@ function EntityList({ userId, showOnlyUserEntities = false, currentUser }) {
   return (
     <div className="entity-list">
       {/* 📊 統計情報 */}
-      {statsData && !statsLoading && (
+      {stats && (
         <div className="stats-section">
           <h3>📊 統計情報</h3>
           <div className="stats-grid">
             <div className="stat-item">
-              <span className="stat-number">{statsData.getEntityStats.total}</span>
+              <span className="stat-number">{stats.total}</span>
               <span className="stat-label">総数</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">{statsData.getEntityStats.activeCount}</span>
+              <span className="stat-number">{stats.activeCount}</span>
               <span className="stat-label">アクティブ</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">{statsData.getEntityStats.inactiveCount}</span>
+              <span className="stat-number">{stats.inactiveCount}</span>
               <span className="stat-label">非アクティブ</span>
             </div>
             <div className="stat-item">
-              <span className="stat-number">{statsData.getEntityStats.todayCreated}</span>
+              <span className="stat-number">{stats.todayCreated}</span>
               <span className="stat-label">今日作成</span>
             </div>
           </div>
@@ -600,15 +550,6 @@ function EntityList({ userId, showOnlyUserEntities = false, currentUser }) {
           </div>
         )}
       </div>
-
-      {/* 📄 ページング */}
-      {entitiesData?.listEntities?.nextToken && (
-        <div className="pagination">
-          <button onClick={handleLoadMore} className="load-more-btn">
-            さらに読み込む
-          </button>
-        </div>
-      )}
     </div>
   );
 }
@@ -846,12 +787,15 @@ export default EntityCard;
 /**
  * 📝 エンティティ作成・編集フォームコンポーネント
  * エンティティの作成と編集を行うフォーム
+ * AWS Amplify v6 generateClient 使用
  */
 
 import React, { useState, useEffect } from 'react';
-import { useMutation } from '@apollo/client';
-import { CREATE_ENTITY, UPDATE_ENTITY } from '../graphql/mutations';
-import { LIST_ENTITIES, LIST_ENTITIES_BY_USER } from '../graphql/queries';
+import { generateClient } from 'aws-amplify/api';
+import { createEntity, updateEntity } from '../graphql/mutations';
+import { listEntities, listEntitiesByUser } from '../graphql/queries';
+
+const client = generateClient();
 
 function EntityForm({ 
   entity = null, // 編集時は既存エンティティ、作成時はnull
@@ -883,63 +827,908 @@ function EntityForm({
     }
   }, [entity]);
 
-  // 🔹 ミューテーションの準備
-  const [createEntity] = useMutation(CREATE_ENTITY, {
-    // 作成後のキャッシュ更新
-    update(cache, { data: { createEntity } }) {
-      try {
-        // 既存のクエリキャッシュに新しいエンティティを追加
-        const existingEntities = cache.readQuery({
-          query: showOnlyUserEntities ? LIST_ENTITIES_BY_USER : LIST_ENTITIES,
+  // 🔹 バリデーション
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'エンティティ名は必須です';
+    } else if (formData.name.length < 2) {
+      newErrors.name = 'エンティティ名は2文字以上で入力してください';
+    } else if (formData.name.length > 100) {
+      newErrors.name = 'エンティティ名は100文字以内で入力してください';
+    }
+
+    if (formData.description && formData.description.length > 500) {
+      newErrors.description = '説明は500文字以内で入力してください';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // 🔹 フォーム送信処理
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      let result;
+      
+      if (isEditMode) {
+        // 更新処理
+        result = await client.graphql({
+          query: updateEntity,
           variables: {
-            ...(showOnlyUserEntities && { userId: currentUser?.sub })
+            input: {
+              id: entity.id,
+              name: formData.name.trim(),
+              description: formData.description.trim(),
+              status: formData.status,
+              updatedAt: new Date().toISOString()
+            }
           }
         });
 
-        if (existingEntities) {
-          cache.writeQuery({
-            query: showOnlyUserEntities ? LIST_ENTITIES_BY_USER : LIST_ENTITIES,
-            variables: {
-              ...(showOnlyUserEntities && { userId: currentUser?.sub })
-            },
-            data: {
-              [showOnlyUserEntities ? 'listEntitiesByUser' : 'listEntities']: [
-                createEntity,
-                ...(Array.isArray(existingEntities[showOnlyUserEntities ? 'listEntitiesByUser' : 'listEntities']) 
-                   ? existingEntities[showOnlyUserEntities ? 'listEntitiesByUser' : 'listEntities']
-                   : existingEntities[showOnlyUserEntities ? 'listEntitiesByUser' : 'listEntities']?.items || [])
-              ]
-            }
-          });
-        }
-      } catch (error) {
-        console.error('キャッシュ更新エラー:', error);
-        // キャッシュ更新に失敗してもエラーにはしない
-      }
-    },
-    onCompleted: (data) => {
-      console.log('エンティティ作成完了:', data.createEntity);
-      onSuccess && onSuccess(data.createEntity);
-    },
-    onError: (error) => {
-      console.error('エンティティ作成エラー:', error);
-      setErrors({ submit: 'エンティティの作成に失敗しました' });
-    }
-  });
-
-  const [updateEntity] = useMutation(UPDATE_ENTITY, {
-    onCompleted: (data) => {
-      console.log('エンティティ更新完了:', data.updateEntity);
-      onSuccess && onSuccess(data.updateEntity);
-    },
-    onError: (error) => {
-      console.error('エンティティ更新エラー:', error);
-      if (error.message.includes('ConflictError')) {
-        setErrors({ submit: 'このエンティティは他のユーザーによって更新されています。ページを再読み込みしてください。' });
+        console.log('エンティティが更新されました:', result.data.updateEntity);
+        onSuccess && onSuccess(result.data.updateEntity, 'updated');
       } else {
-        setErrors({ submit: 'エンティティの更新に失敗しました' });
+        // 作成処理
+        result = await client.graphql({
+          query: createEntity,
+          variables: {
+            input: {
+              name: formData.name.trim(),
+              description: formData.description.trim(),
+              status: formData.status,
+              userId: currentUser.sub,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            }
+          }
+        });
+
+        console.log('エンティティが作成されました:', result.data.createEntity);
+        onSuccess && onSuccess(result.data.createEntity, 'created');
       }
+
+      // フォームをリセット（作成モードの場合）
+      if (!isEditMode) {
+        setFormData({
+          name: '',
+          description: '',
+          status: 'ACTIVE'
+        });
+      }
+
+    } catch (error) {
+      console.error('エンティティ保存エラー:', error);
+      
+      // エラーメッセージを設定
+      if (error.errors && error.errors.length > 0) {
+        const graphqlError = error.errors[0];
+        if (graphqlError.errorType === 'ValidationException') {
+          setErrors({ submit: 'データの形式が正しくありません' });
+        } else if (graphqlError.errorType === 'UnauthorizedException') {
+          setErrors({ submit: '操作する権限がありません' });
+        } else {
+          setErrors({ submit: graphqlError.message || '保存に失敗しました' });
+        }
+      } else {
+        setErrors({ submit: '保存に失敗しました。もう一度お試しください。' });
+      }
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  // 🔹 入力値変更ハンドラー
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+
+    // エラーをクリア
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  // 🔹 キャンセル処理
+  const handleCancel = () => {
+    if (!isEditMode) {
+      setFormData({
+        name: '',
+        description: '',
+        status: 'ACTIVE'
+      });
+    }
+    setErrors({});
+    onCancel && onCancel();
+  };
+
+  return (
+    <div className="entity-form">
+      <div className="form-header">
+        <h2>
+          {isEditMode ? '✏️ エンティティ編集' : '🆕 新しいエンティティ'}
+        </h2>
+      </div>
+
+      <form onSubmit={handleSubmit} className="form-content">
+        {/* エンティティ名 */}
+        <div className="field-group">
+          <label htmlFor="name" className="field-label">
+            エンティティ名 <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className={`form-input ${errors.name ? 'error' : ''}`}
+            placeholder="エンティティ名を入力..."
+            maxLength={100}
+            disabled={isSubmitting}
+            autoComplete="off"
+          />
+          {errors.name && (
+            <span className="error-message">{errors.name}</span>
+          )}
+        </div>
+
+        {/* 説明 */}
+        <div className="field-group">
+          <label htmlFor="description" className="field-label">
+            説明
+          </label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            className={`form-textarea ${errors.description ? 'error' : ''}`}
+            placeholder="エンティティの説明を入力..."
+            rows={4}
+            maxLength={500}
+            disabled={isSubmitting}
+          />
+          <div className="character-count">
+            {formData.description.length} / 500
+          </div>
+          {errors.description && (
+            <span className="error-message">{errors.description}</span>
+          )}
+        </div>
+
+        {/* ステータス */}
+        <div className="field-group">
+          <label htmlFor="status" className="field-label">
+            ステータス
+          </label>
+          <select
+            id="status"
+            name="status"
+            value={formData.status}
+            onChange={handleInputChange}
+            className="form-select"
+            disabled={isSubmitting}
+          >
+            <option value="ACTIVE">🟢 アクティブ</option>
+            <option value="INACTIVE">🔴 非アクティブ</option>
+            <option value="ARCHIVED">📦 アーカイブ</option>
+          </select>
+        </div>
+
+        {/* 送信エラー */}
+        {errors.submit && (
+          <div className="submit-error">
+            ❌ {errors.submit}
+          </div>
+        )}
+
+        {/* アクションボタン */}
+        <div className="form-actions">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="btn btn-secondary"
+            disabled={isSubmitting}
+          >
+            キャンセル
+          </button>
+          
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <span className="loading-spinner"></span>
+                {isEditMode ? '更新中...' : '作成中...'}
+              </>
+            ) : (
+              isEditMode ? '更新' : '作成'
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+export default EntityForm;
+```
+
+## 🎨 スタイリングとUIパターン
+
+### CSSテンプレート
+
+```css
+/**
+ * エンティティ関連コンポーネントのスタイリング
+ * 一貫性のあるデザインシステムに基づいたスタイル
+ */
+
+/* 🔹 基本レイアウト */
+.entity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+.entities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+/* 🔹 統計情報セクション */
+.stats-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  color: white;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.stat-number {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+/* 🔹 検索・フィルターコントロール */
+.controls-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 250px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.filter-buttons button {
+  padding: 0.5rem 1rem;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-buttons button:hover {
+  border-color: #cbd5e0;
+}
+
+.filter-buttons button.active {
+  background: #4299e1;
+  border-color: #4299e1;
+  color: white;
+}
+
+/* 🔹 エンティティカードスタイル */
+.entity-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.entity-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e0;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1rem;
+  border-bottom: 1px solid #f7fafc;
+}
+
+.entity-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: #2d3748;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.status-badge.active {
+  background: #c6f6d5;
+  color: #276749;
+}
+
+.status-badge.inactive {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+.status-badge.archived {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.card-content {
+  padding: 1rem;
+}
+
+.entity-description {
+  color: #718096;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: #f7fafc;
+  font-size: 0.875rem;
+  color: #718096;
+}
+
+/* 🔹 フォームスタイル */
+.entity-form {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.form-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.form-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.form-content {
+  padding: 2rem;
+}
+
+.field-group {
+  margin-bottom: 1.5rem;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.required {
+  color: #e53e3e;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-input.error,
+.form-textarea.error {
+  border-color: #e53e3e;
+}
+
+.error-message {
+  display: block;
+  color: #e53e3e;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.character-count {
+  text-align: right;
+  font-size: 0.75rem;
+  color: #718096;
+  margin-top: 0.25rem;
+}
+
+.submit-error {
+  background: #fed7d7;
+  color: #c53030;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+/* 🔹 ボタンスタイル */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: #4299e1;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #3182ce;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #cbd5e0;
+}
+
+.btn-danger {
+  background: #e53e3e;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #c53030;
+}
+
+/* 🔹 ローディング・エラーコンポーネント */
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #718096;
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+/* 🔹 レスポンシブデザイン */
+@media (max-width: 768px) {
+  .entities-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .controls-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-input {
+    min-width: auto;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+## 🏗️ ベストプラクティス
+
+### パフォーマンス最適化
+
+```javascript
+/**
+ * 📈 パフォーマンス最適化のベストプラクティス
+ * AWS Amplify v6対応
+ */
+
+// 1. 🎯 GraphQLクエリの最適化
+// 必要なフィールドのみ選択
+const /* GraphQL */ listEntitiesOptimized = `
+  query ListEntitiesOptimized($limit: Int, $nextToken: String) {
+    listEntities(limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        status
+        updatedAt
+        # 詳細は必要な時のみ取得
+      }
+      nextToken
+    }
+  }
+`;
+
+// 2. 🔄 リアルタイム更新の制御
+const useOptimizedSubscription = (entityId, enabled = true) => {
+  useEffect(() => {
+    if (!enabled || !entityId) return;
+
+    const subscription = client.graphql({
+      query: onEntityUpdated,
+      variables: { id: entityId }
+    }).subscribe({
+      next: ({ data }) => {
+        // バッチ更新でDOM操作を削減
+        requestAnimationFrame(() => {
+          updateEntityState(data.onEntityUpdated);
+        });
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [entityId, enabled]);
+};
+
+// 3. 📦 コンポーネントの遅延読み込み
+const EntityForm = React.lazy(() => import('./EntityForm'));
+const EntityDetails = React.lazy(() => import('./EntityDetails'));
+
+function App() {
+  return (
+    <React.Suspense fallback={<LoadingSpinner />}>
+      <EntityForm />
+    </React.Suspense>
+  );
+}
+
+// 4. 🏪 効率的な状態管理
+const useEntityCache = () => {
+  const [cache, setCache] = useState(new Map());
+  
+  const getEntity = useCallback(async (id) => {
+    if (cache.has(id)) {
+      return cache.get(id);
+    }
+    
+    const result = await client.graphql({
+      query: getEntityById,
+      variables: { id }
+    });
+    
+    setCache(prev => new Map(prev).set(id, result.data.getEntity));
+    return result.data.getEntity;
+  }, [cache]);
+  
+  return { getEntity, cache };
+};
+```
+
+### エラーハンドリング
+
+```javascript
+/**
+ * 🛡️ 堅牢なエラーハンドリング戦略
+ * AWS Amplify v6エラーパターンに対応
+ */
+
+// 1. 🎯 GraphQLエラーの分類と処理
+const handleGraphQLError = (error) => {
+  console.error('GraphQL Error:', error);
+  
+  if (error.errors) {
+    error.errors.forEach(err => {
+      switch (err.errorType) {
+        case 'UnauthorizedException':
+          // 認証エラー
+          redirectToLogin();
+          break;
+        case 'ValidationException':
+          // バリデーションエラー
+          showValidationErrors(err.message);
+          break;
+        case 'ConflictException':
+          // 競合エラー
+          showConflictResolution();
+          break;
+        case 'DynamoDB:ConditionalCheckFailedException':
+          // 楽観的ロック失敗
+          showOptimisticLockError();
+          break;
+        default:
+          // その他のエラー
+          showGenericError(err.message);
+      }
+    });
+  }
+};
+
+// 2. 🔄 リトライ機能付きAPI呼び出し
+const executeWithRetry = async (operation, maxRetries = 3) => {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      // 指数バックオフ
+      const delay = Math.pow(2, attempt) * 1000;
+      await new Promise(resolve => setTimeout(resolve, delay));
+      console.log(`リトライ ${attempt}/${maxRetries}...`);
+    }
+  }
+};
+
+// 3. 🌐 ネットワークエラーの処理
+const useNetworkStatus = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+    
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+  
+  return isOnline;
+};
+
+// 4. 📊 エラー報告とロギング
+const logError = (error, context = {}) => {
+  const errorReport = {
+    message: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+    userId: context.userId,
+    component: context.component,
+    action: context.action,
+    userAgent: navigator.userAgent,
+    url: window.location.href
+  };
+  
+  // 本番環境では外部サービスに送信
+  if (process.env.NODE_ENV === 'production') {
+    sendErrorToLoggingService(errorReport);
+  } else {
+    console.error('Error Report:', errorReport);
+  }
+};
+```
+
+### アクセシビリティ
+
+```javascript
+/**
+ * ♿ アクセシビリティのベストプラクティス
+ * WCAG 2.1 AA準拠
+ */
+
+// 1. 🎯 適切なARIA属性
+function AccessibleEntityCard({ entity, isSelected, onSelect }) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`エンティティ: ${entity.name}. ステータス: ${entity.status}`}
+      aria-selected={isSelected}
+      className={`entity-card ${isSelected ? 'selected' : ''}`}
+      onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
+    >
+      <h3 id={`entity-${entity.id}-title`}>
+        {entity.name}
+      </h3>
+      <p aria-describedby={`entity-${entity.id}-title`}>
+        {entity.description}
+      </p>
+    </div>
+  );
+}
+
+// 2. 🔧 フォームアクセシビリティ
+function AccessibleForm() {
+  const [errors, setErrors] = useState({});
+  
+  return (
+    <form role="form" aria-label="エンティティフォーム">
+      <div className="field-group">
+        <label htmlFor="entity-name">
+          エンティティ名
+          <span aria-label="必須項目">*</span>
+        </label>
+        <input
+          id="entity-name"
+          type="text"
+          aria-required="true"
+          aria-invalid={errors.name ? 'true' : 'false'}
+          aria-describedby={errors.name ? 'name-error' : undefined}
+        />
+        {errors.name && (
+          <span id="name-error" role="alert" className="error-message">
+            {errors.name}
+          </span>
+        )}
+      </div>
+    </form>
+  );
+}
+
+// 3. 🔄 ライブリージョンによる動的更新の通知
+function LiveUpdates() {
+  const [announcement, setAnnouncement] = useState('');
+  
+  const announceUpdate = (message) => {
+    setAnnouncement(message);
+    // メッセージをクリア
+    setTimeout(() => setAnnouncement(''), 1000);
+  };
+  
+  return (
+    <>
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+      >
+        {announcement}
+      </div>
+      
+      <button
+        onClick={() => {
+          saveEntity();
+          announceUpdate('エンティティが保存されました');
+        }}
+      >
+        保存
+      </button>
+    </>
+  );
+}
+```
   });
 
   // 🔹 バリデーション
