@@ -7,35 +7,11 @@
 
 ## 📋 GraphQLスキーマ概要
 
-このアプリで使用するGraphQLスキーマの基本構成：
+このアプリケーションで使用するGraphQLスキーマの基本構成：
 
 ```graphql
-# 主要な型定義│   └── templates/                 # 📄 実装テンプレート集
-│       ├── README.md              # テンプレート使用ガイド・一覧
-│       ├── graphql-schema-template.md       # GraphQLスキーマ設計
-│       ├── terraform-template.md            # Terraformテンプレート
-│       ├── javascript-resolver-basic-template.md      # 基本CRUD操作
-│       ├── javascript-resolver-advanced-template.md   # 高度なクエリ・統計
-│       ├── javascript-resolver-template.md         ### 🧪 開発効率向上 {#typescript-migration}
-- [x] 🔍 **コード品質**: ESLint導入による継続的品質保証 ✅ **完了！**
-- [x] 📚 **ドキュメント体系化**: テンプレートファイルの機能別分割・スキルレベル別整理 ✅ **完了！**
-- [x] 🤖 **AI機能統合**: Lambda + Comprehend による感情分析システム ✅ **完了！**
-- [x] 🎨 **フロントエンドAI統合**: React UIでのリアルタイム感情分析表示 ✅ **完了！**
-- [x] 🔧 **バックエンド統合**: AppSync Lambda Resolver + DynamoDB連携 ✅ **完了！**
-- [x] 📊 **AI分析機能**: 4種類感情分類・25言語対応・コンテンツモデレーション ✅ **完了！**
-- [x] 🏗️ **アーキテクチャ最適化**: Lambda関数分離・Terraform設定最適化 ✅ **完了！**
-- [x] 📦 **Package.json最適化**: ES Modules対応・不要フィールド削除 ✅ **完了！**
-- [x] 📝 **ドキュメント更新**: 全README修正内容反映 ✅ **完了！**
-- [ ] 🔤 **TypeScript導入**: GraphQL Code Generator による型安全性
-- [ ] 🧪 **テスト自動化**: Jest + React Testing Library
-- [ ] 🎭 **E2Eテスト**: Playwright + モックAPI
-- [ ] 📱 **モバイル対応**: React Native + Expo による統合開発全版（参考用）
-│       ├── lambda-resolver-template.md                 # 🤖 Lambdaリゾルバパターン（🆕）
-│       ├── react-graphql-template.md                  # GraphQL操作専用
-│       ├── react-components-template.md               # UIコンポーネント専用
-│       ├── react-forms-template.md                    # フォーム処理専用
-│       ├── react-styling-template.md                  # CSS・スタイリング専用
-│       └── react-frontend-template.md                 # 完全版（参考用）
+# 主要な型定義
+type Room {
   id: ID!              # ルーム識別番号
   name: String!        # ルーム名
   owner: String!       # 作成者
@@ -119,12 +95,14 @@ type Subscription {
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/keitti73/chat_app_by_ai)
 [![Code Quality](https://img.shields.io/badge/code%20quality-excellent-brightgreen.svg)](#code-quality)
-[![Terraform](https://img.shields.io/badge/terraform-validated-blue.svg)](#terraform-validation)
+[![Terraform](https://img.shields.io/badge/terraform-optimized-blue.svg)](#terraform-optimization)
+[![Infrastructure](https://img.shields.io/badge/infrastructure-optimized-green.svg)](#infrastructure-optimization)
 [![TypeScript Ready](https://img.shields.io/badge/typescript-ready-blue.svg)](#typescript-migration)
 [![Production Ready](https://img.shields.io/badge/production-ready-green.svg)](#production-deployment)
 [![Package.json](https://img.shields.io/badge/package.json-optimized-orange.svg)](#package-optimization)
 [![AI Features](https://img.shields.io/badge/AI-integrated-purple.svg)](#ai-integration)
 [![Lambda Functions](https://img.shields.io/badge/lambda-separated-yellow.svg)](#lambda-architecture)
+[![Documentation](https://img.shields.io/badge/docs-comprehensive-brightgreen.svg)](#documentation)
 
 ### 🧪 開発効率向上 {#typescript-migration}
 - [x] 🔍 **コード品質**: ESLint導入による継続的品質保証 ✅ **完了！**
@@ -133,8 +111,7 @@ type Subscription {
 - [ ] 🔤 **TypeScript導入**: GraphQL Code Generator による型安全性
 - [ ] 🧪 **テスト自動化**: Jest + React Testing Library
 - [ ] 🎭 **E2Eテスト**: Playwright + モックAPI
-- [ ] 📱 **モバイル対応**: React Native + Expo による統合開発eady](https://img.shields.io/badge/typescript-ready-blue.svg)](#typescript-migration)
-[![Production Ready](https://img.shields.io/badge/production-ready-green.svg)](#production-deployment)
+- [ ] 📱 **モバイル対応**: React Native + Expo による統合開発
 
 ## 📱 何ができるアプリ？
 
@@ -157,10 +134,18 @@ type Subscription {
 - **データストア**: Amazon DynamoDB（Room/Message/SentimentAnalysisテーブル＋GSI）
 - **ユーザー認証**: Amazon Cognito（User Pool + Identity Pool）
 - **フロントエンド**: React＋Vite＋AWS Amplify v6
-- **IaC**: Terraform（Infrastructure as Code）
+- **IaC**: Terraform（Infrastructure as Code・最適化済み）
 - **コード品質**: ESLint v9 + React プラグイン
 - **CI/CD**: GitHub Actions等（自動デプロイ可能）
 - **AI統合**: リアルタイム感情分析・多言語サポート・コンテンツモデレーション
+- **監視**: CloudWatch + アラーム + ダッシュボード
+- **セキュリティ**: IAM最小権限・暗号化・X-Rayトレーシング
+
+### 🏗️ **Infrastructure Tier (インフラ層)**
+- **Terraform**: Infrastructure as Code（最適化済み・分割戦略実装）
+- **CloudWatch**: ログ・監視・ダッシュボード・アラーム
+- **IAM Roles**: 権限制御・セキュリティ（最小権限原則）
+- **X-Ray**: 分散トレーシング・パフォーマンス監視
 
 ## ✨ プロジェクトの特徴
 
@@ -236,7 +221,6 @@ flowchart TB
     JSResolvers --> DynamoDB
     LambdaResolvers --> SentimentTable
     DynamoDB --> GSI
-```
     Amplify --> AppSync
     AppSync --> Cognito
     AppSync --> JSResolvers
@@ -417,15 +401,20 @@ npm run dev
 │   │   └── subscriptions.js      # 🔔 リアルタイム通知の設定
 │   ├── App.jsx                    # 🏠 アプリ全体をコントロールするメインファイル
 │   └── main.jsx                   # 🚀 アプリの起動ファイル
-├── infra/                         # ☁️ AWS（雲サービス）の設定
-│   ├── README.md                  # インフラ構成説明
-│   ├── main.tf                   # ⚙️ 基本設定
-│   ├── dynamodb.tf               # 🗄️ データベースの設定
-│   ├── appsync.tf                # 📡 API サーバーの設定
-│   ├── cognito.tf                # 🔐 ユーザー認証の設定
-│   ├── resolvers.tf              # 🔄 データ処理ロジックの設定
-│   ├── lambda.tf                 # 🤖 Lambda関数・AI機能設定（🆕）
-│   ├── outputs.tf                # 📋 作成したサービスの情報出力
+├── infra/                         # ☁️ AWS（雲サービス）の設定（最適化済み）
+│   ├── README.md                  # インフラ構成説明・運用ガイド
+│   ├── main.tf                   # ⚙️ Terraform・プロバイダー設定
+│   ├── variables.tf              # � 変数定義（バリデーション付き）
+│   ├── locals.tf                 # � ローカル値・計算値定義
+│   ├── outputs.tf                # � 出力値（フロントエンド設定含む）
+│   ├── terraform.tfvars.example  # 📄 設定テンプレート
+│   ├── iam.tf                    # � IAMロール・ポリシー（分離）
+│   ├── dynamodb.tf               # 🗄️ DynamoDB最適化設定
+│   ├── cognito_optimized.tf      # 🔐 Cognito認証強化設定
+│   ├── appsync_optimized.tf      # 📡 AppSync GraphQL API最適化
+│   ├── lambda_optimized.tf       # 🤖 Lambda関数最適化設定
+│   ├── resolvers_optimized.tf    # 🔄 GraphQLリゾルバー設定
+│   └── resolver_templates/       # � リゾルバーテンプレート
 │   └── terraform.tfvars.example  # 環境変数設定例
 ├── resolvers/                     # 🧠 サーバー側のデータ処理ロジック
 │   ├── README.md                  # リゾルバー構成説明

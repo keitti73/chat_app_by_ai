@@ -1,7 +1,11 @@
 {
   "name": "javascript-node-4",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
+  "description": "AWS AppSync Chat Application with Optimized Infrastructure - Terraform最適化済みチャットアプリケーション",
+  "keywords": ["aws", "appsync", "graphql", "react", "terraform", "optimized", "serverless", "chat"],
+  "author": "GitHub Copilot Optimized Infrastructure Team",
+  "license": "ISC",
   "directories": {
     "doc": "doc"
   },
@@ -18,10 +22,6 @@
     "tf-destroy": "cd infra && terraform destroy",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "@aws-amplify/auth": "^6.13.3",
     "aws-amplify": "^6.15.3",

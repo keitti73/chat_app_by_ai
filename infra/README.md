@@ -1,432 +1,248 @@
-# 🏗️ Infrastructure - AWS AppSync Chat App
+# Terraform Infrastructure Documentation
 
-[![Terraform](https://img.shields.io/badge/Terraform-Validated-623CE4.svg)](#terraform検証済み)
-[![Pipeline Resolvers](https://img.shields.io/badge/Resolvers-Pipeline%20Ready-success.svg)](#パイプラインリゾルバー対応)
-[![Infrastructure](https://img.shields.io/badge/Infrastructure-Production%20Ready-orange.svg)](#本番環境対応)
+## 📊 概要
 
-このディレクトリには、AWS AppSync チャットアプリケーションの **検証済み・最適化された** インフラストラクチャをTerraformで管理するためのファイルが含まれています。
+このディレクトリには、AWS AppSyncベースのチャットアプリケーション用のTerraformインフラストラクチャコード（**最適化版**）が含まれています。エンタープライズグレードのファイル分割戦略とベストプラクティスに従って構成されています。
 
----
+## 🎯 最適化のハイライト
 
-## 🚀 インフラストラクチャ最適化
+> **✅ 2024年インフラ最適化完了**
+> - **ファイル分割**: 責任領域別の明確な分離
+> - **セキュリティ**: 最小権限IAMとデータ暗号化
+> - **モニタリング**: CloudWatch統合と詳細ログ
+> - **効率化**: リソース最適化とコスト削減
+> - **運用性**: 環境別設定とスケーラビリティ
 
-### ✅ 実装済み改善
-- **パイプラインリゾルバー対応**: myActiveRooms最適化アーキテクチャ
-- **AI感情分析機能**: AWS Comprehend統合による高度な分析
-- **Lambda統合**: サーバーレス処理によるスケーラブルなAI機能
-- **Terraform構文検証**: `terraform validate`でチェック済み
-- **GSI設計最適化**: 効率的なクエリパターン対応
-- **セキュリティ強化**: IAMロールの最小権限原則
-- **スケーラビリティ確保**: DynamoDB自動スケーリング対応
-
----
-
-## 📁 ディレクトリ構成
-
-```
-infra/
-├── README.md                    # このファイル
-├── main.tf                      # Terraform設定とプロバイダー定義
-├── cognito.tf                   # Cognito認証リソース
-├── dynamodb.tf                  # DynamoDB データベース
-├── appsync.tf                   # AppSync GraphQL API
-├── resolvers.tf                 # AppSync リゾルバー
-├── lambda.tf                    # 🤖 Lambda関数・AI機能設定（🆕）
-├── outputs.tf                   # 出力値定義
-└── terraform.tfvars.example     # 変数ファイルテンプレート
-```
-
----
-
-## 🏗️ インフラストラクチャ概要
-
-### **作成されるAWSリソース**
+## 🏗️ アーキテクチャ概要
 
 ```mermaid
 graph TB
-    subgraph "認証"
-        UP[Cognito User Pool]
-        UPC[User Pool Client]
-        IP[Identity Pool]
-    end
+    A[React Frontend] --> B[AWS AppSync]
+    B --> C[Amazon Cognito]
+    B --> D[DynamoDB Tables]
+    B --> E[Lambda Functions]
     
-    subgraph "API"
-        AS[AppSync GraphQL API]
-        DS1[DynamoDB DataSource Room]
-        DS2[DynamoDB DataSource Message]
-        DS3[Lambda DataSource AI]
-        RES[JavaScript Resolvers]
-        LAMBDA_RES[Lambda Resolvers]
-    end
+    C --> F[User Pool]
+    C --> G[Identity Pool]
     
-    subgraph "AI Services"
-        LAMBDA[Lambda Function]
-        COMPREHEND[AWS Comprehend]
-        SQS[SQS Dead Letter Queue]
-    end
+    D --> H[Room Table<br/>TTL・暗号化]
+    D --> I[Message Table<br/>PITR・モニタリング]
     
-    subgraph "データベース"
-        ROOM[(DynamoDB Room Table)]
-        MSG[(DynamoDB Message Table)]
-        SENTIMENT[(DynamoDB Sentiment Table)]
-        GSI1[owner-index]
-        GSI2[user-index]
-        GSI3[room-index]
-        GSI4[sentiment-index]
-    end
+    E --> J[Sentiment Analysis<br/>X-Ray対応]
+    J --> K[AWS Comprehend]
     
-    subgraph "権限"
-        IAM_AS[AppSync Service Role]
-        IAM_CW[CloudWatch Logs Role]
-        IAM_LAMBDA[Lambda Execution Role]
-        IAM_COMPREHEND[Comprehend Access Role]
-    end
-    
-    UP --> UPC
-    UP --> IP
-    AS --> DS1
-    AS --> DS2
-    AS --> DS3
-    DS1 --> ROOM
-    DS2 --> MSG
-    DS3 --> LAMBDA
-    LAMBDA --> COMPREHEND
-    LAMBDA --> SENTIMENT
-    LAMBDA --> SQS
-    ROOM --> GSI1
-    MSG --> GSI2
-    MSG --> GSI3
-    SENTIMENT --> GSI4
-    AS --> IAM_AS
-    AS --> IAM_CW
-    LAMBDA --> IAM_LAMBDA
-    LAMBDA --> IAM_COMPREHEND
+    L[CloudWatch] --> D
+    L --> E
+    M[IAM Roles<br/>最小権限] --> B
+    M --> E
 ```
 
-### **技術スタック**
-- **AWS AppSync**: GraphQL API、リアルタイム通信
-- **DynamoDB**: NoSQL データベース、GSI による高速検索
-- **AWS Lambda**: サーバーレス関数、AI処理エンジン
-- **AWS Comprehend**: 自然言語処理、感情分析AI
-- **Cognito**: ユーザー認証・認可
-- **CloudWatch**: ログ・監視
-- **IAM**: アクセス制御
+## 📁 ファイル構造（最適化版）
 
----
+```
+infra/
+├── main.tf                    # メイン設定・プロバイダー設定
+├── variables.tf               # 🆕 変数定義・検証ルール
+├── locals.tf                  # 🆕 ローカル値・設定管理
+├── iam.tf                     # 🆕 IAMロール・ポリシー
+├── dynamodb.tf               # 🆕 DynamoDB最適化設定
+├── cognito_optimized.tf      # 🆕 Cognito強化設定
+├── lambda_optimized.tf       # 🆕 Lambda最適化・監視
+├── appsync_optimized.tf      # 🆕 AppSync強化設定
+├── resolvers_optimized.tf    # 🆕 リゾルバー最適化
+├── outputs.tf                # 出力値定義
+├── variables.tf               # 変数定義（検証ルール付き）
+├── locals.tf                  # ローカル値・計算値定義
+├── outputs.tf                 # 出力値定義
+├── terraform.tfvars.example   # 設定例ファイル
+├── iam.tf                     # IAMロール・ポリシー定義
+├── dynamodb.tf                # DynamoDBテーブル定義
+├── cognito_optimized.tf       # Cognito認証設定
+├── appsync_optimized.tf       # AppSync GraphQL API設定
+├── lambda_optimized.tf        # Lambda関数設定
+├── resolvers_optimized.tf     # GraphQLリゾルバー設定
+└── resolver_templates/        # リゾルバーテンプレート
+    └── pipeline_resolver.js.tpl
+```
 
-## 🚀 クイックスタート
+## 主要な最適化ポイント
 
-### 1. **事前準備**
+### 1. ファイル分割戦略
 
+- **責務別分離**: 各AWSサービスごとにファイルを分割
+- **設定の集約**: 変数とローカル値を専用ファイルに集約
+- **IAMの分離**: セキュリティ関連設定を独立したファイルに配置
+
+### 2. リソース最適化
+
+- **DynamoDB最適化**:
+  - 環境別のPoint-in-Time Recovery設定
+  - TTL設定によるメッセージ自動削除
+  - 効率的なGSI設計
+
+- **Lambda最適化**:
+  - 環境変数の動的設定
+  - X-Ray トレーシング対応
+  - プロビジョニング済み同時実行設定
+
+- **AppSync最適化**:
+  - 環境別ログレベル設定
+  - CloudWatch Dashboardの自動作成
+  - X-Ray トレーシング対応
+
+### 3. セキュリティ強化
+
+- **最小権限の原則**: IAMポリシーの最適化
+- **暗号化**: DynamoDBとLambdaでの暗号化有効化
+- **MFA対応**: 本番環境でのMFA設定
+- **API Key制限**: 本番環境でのAPI Key無効化
+
+## 使用方法
+
+### 初期セットアップ
+
+1. **設定ファイルの準備**:
+   ```bash
+   cp terraform.tfvars.example terraform.tfvars
+   # terraform.tfvarsを環境に応じて編集
+   ```
+
+2. **Terraformの初期化**:
+   ```bash
+   terraform init
+   ```
+
+3. **プランの確認**:
+   ```bash
+   terraform plan
+   ```
+
+4. **リソースの作成**:
+   ```bash
+   terraform apply
+   ```
+
+### 環境別デプロイ
+
+#### 開発環境
 ```bash
-# AWS CLI設定確認
-aws configure list
-
-# Terraformインストール確認
-terraform version
-
-# infraディレクトリに移動
-cd infra
+terraform workspace new dev
+terraform apply -var="environment=dev"
 ```
 
-### 2. **初期セットアップ**
-
+#### ステージング環境
 ```bash
-# Terraform初期化
-terraform init
-
-# 変数ファイル作成
-cp terraform.tfvars.example terraform.tfvars
-
-# 変数ファイルを編集
-vim terraform.tfvars
+terraform workspace new staging
+terraform apply -var="environment=staging"
 ```
 
-### 3. **デプロイ実行**
-
+#### 本番環境
 ```bash
-# プラン確認
-terraform plan -var-file="terraform.tfvars"
-
-# リソース作成
-terraform apply -var-file="terraform.tfvars"
-
-# 出力値確認
-terraform output
+terraform workspace new prod
+terraform apply -var="environment=prod"
 ```
 
----
+## 主要な設定変数
 
-## 📋 設定ファイル
+| 変数名 | 説明 | デフォルト値 | 本番推奨値 |
+|--------|------|-------------|-----------|
+| `environment` | 環境名 | `dev` | `prod` |
+| `dynamodb_billing_mode` | DynamoDB課金モード | `PAY_PER_REQUEST` | `PAY_PER_REQUEST` |
+| `cognito_password_minimum_length` | パスワード最小文字数 | `8` | `12` |
+| `enable_comprehend` | Comprehend有効化 | `true` | `true` |
+| `enable_xray_tracing` | X-Ray有効化 | `false` | `true` |
+| `appsync_log_level` | AppSyncログレベル | `ERROR` | `ERROR` |
 
-### **terraform.tfvars の設定例**
+## 出力値
 
-```hcl
-# AWS Region
-aws_region = "ap-northeast-1"
+### フロントエンド設定用
+- `frontend_config`: React アプリケーション用の設定オブジェクト
+- `appsync_graphql_endpoint`: GraphQL エンドポイントURL
+- `cognito_user_pool_id`: Cognito ユーザープールID
 
-# Project Name
-project_name = "my-chat-app"
-```
+### インフラ管理用
+- `appsync_api_id`: AppSync API ID
+- `dynamodb_room_table_name`: ルームテーブル名
+- `lambda_sentiment_analysis_function_arn`: 感情分析Lambda ARN
 
-### **変数設定**
+## メンテナンス
 
-現在の実装では `terraform.tfvars.example` をベースに変数を設定します：
+### 定期的な作業
 
-1. `terraform.tfvars.example` を `terraform.tfvars` にコピー
-2. 必要に応じて値を変更
-3. 追加の変数は各 `.tf` ファイルで定義されています
+1. **セキュリティアップデート**:
+   - プロバイダーバージョンの更新
+   - Lambda ランタイムの更新
 
----
+2. **コスト最適化**:
+   - DynamoDB使用量の監視
+   - Lambda実行時間の最適化
 
-## 🔧 操作コマンド
+3. **バックアップ確認**:
+   - DynamoDBのPoint-in-Time Recoveryステータス
+   - Terraformステートファイルのバックアップ
 
-### **基本操作**
+### トラブルシューティング
 
-```bash
-# 初期化
-terraform init
+#### よくある問題
 
-# フォーマット
-terraform fmt
+1. **API Key期限切れ**:
+   ```bash
+   terraform refresh
+   terraform apply  # API Keyが自動更新される
+   ```
 
-# バリデーション
-terraform validate
+2. **Lambda権限エラー**:
+   - IAMロールの権限を確認
+   - リソースポリシーの確認
 
-# プラン表示
-terraform plan
+3. **DynamoDB容量エラー**:
+   - GSIの設定確認
+   - 課金モードの見直し
 
-# 適用
-terraform apply
+## セキュリティ考慮事項
 
-# 削除
-terraform destroy
-```
+### 本番環境での推奨設定
 
-### **環境別デプロイ**
+1. **Terraformステート管理**:
+   - S3バックエンドの使用
+   - ステートファイルの暗号化
+   - バージョニングの有効化
 
-現在の実装では単一の `terraform.tfvars` ファイルを使用します。
-環境別に管理したい場合は、ファイル名を変更して使用してください：
+2. **アクセス制御**:
+   - IAMユーザーではなくロールベースアクセス
+   - MFA必須化
+   - 最小権限の原則
 
-```bash
-# 開発環境用の変数ファイルを作成
-cp terraform.tfvars.example terraform-dev.tfvars
-terraform plan -var-file="terraform-dev.tfvars"
-terraform apply -var-file="terraform-dev.tfvars"
+3. **監視・ログ**:
+   - CloudTrailの有効化
+   - CloudWatch Alarmsの設定
+   - 異常検知の実装
 
-# 本番環境用の変数ファイルを作成  
-cp terraform.tfvars.example terraform-prod.tfvars
-terraform plan -var-file="terraform-prod.tfvars"
-terraform apply -var-file="terraform-prod.tfvars"
-```
-
-### **出力値取得**
-
-```bash
-# 全出力値表示
-terraform output
-
-# 特定の出力値表示
-terraform output appsync_graphql_endpoint
-terraform output cognito_user_pool_id
-terraform output cognito_user_pool_client_id
-
-# 機密情報（API Key）は -raw オプションで取得
-terraform output -raw appsync_api_key
-```
-
----
-
-## 📊 出力される設定情報
-
-デプロイ完了後、以下の情報がフロントエンド用に出力されます：
-
-### **AppSync 設定**
-- GraphQL API エンドポイント (`appsync_graphql_endpoint`)
-- API ID (`appsync_api_id`) 
-- API Key (`appsync_api_key`) - 機密情報として保護
-
-### **Cognito 設定**
-- User Pool ID (`cognito_user_pool_id`)
-- User Pool Client ID (`cognito_user_pool_client_id`)
-- Identity Pool ID (`cognito_identity_pool_id`)
-
-### **DynamoDB 設定**
-- Room テーブル名 (`dynamodb_room_table_name`)
-- Message テーブル名 (`dynamodb_message_table_name`)
-
-### **Lambda・AI機能設定**
-- Lambda 関数名 (`lambda_sentiment_function_name`)
-- Lambda 関数 ARN (`lambda_sentiment_function_arn`)
-- 感情分析テーブル名 (`dynamodb_sentiment_table_name`)
-- SQS Dead Letter Queue URL (`sqs_dlq_url`)
-
----
-
-## 🛠️ カスタマイズ
-
-### **新しいLambda関数追加**
-
-1. `lambda.tf` にLambda関数定義を追加
-2. `appsync.tf` でLambdaデータソースを追加
-3. `../resolvers/` ディレクトリにLambda関数コードを作成
-
-```hcl
-# 新しいLambda関数例
-resource "aws_lambda_function" "content_moderation" {
-  filename         = "content_moderation.zip"
-  function_name    = "${var.project_name}-content-moderation"
-  role            = aws_iam_role.lambda_execution_role.arn
-  handler         = "index.handler"
-  runtime         = "nodejs18.x"
-  timeout         = 30
-  
-  environment {
-    variables = {
-      MODERATION_TABLE = aws_dynamodb_table.content_moderation.name
-    }
-  }
-}
-
-# AppSyncデータソース
-resource "aws_appsync_datasource" "content_moderation_lambda" {
-  api_id           = aws_appsync_graphql_api.chat_api.id
-  name             = "ContentModerationLambda"
-  service_role_arn = aws_iam_role.appsync_lambda_role.arn
-  type             = "AWS_LAMBDA"
-  
-  lambda_config {
-    function_arn = aws_lambda_function.content_moderation.arn
-  }
-}
-```
-
-### **新しいDynamoDBテーブル追加**
-
-1. `dynamodb.tf` にテーブル定義を追加
-2. `appsync.tf` でデータソースを追加
-3. 必要に応じてGSIを設定
-
-```hcl
-# 新しいテーブル例
-resource "aws_dynamodb_table" "user_profile" {
-  name           = "${var.project_name}-user-profile"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "userId"
-  
-  attribute {
-    name = "userId"
-    type = "S"
-  }
-  
-  tags = {
-    Name = "${var.project_name}-user-profile"
-  }
-}
-```
-
-### **新しいAppSyncリゾルバー追加**
-
-1. `resolvers.tf` にリゾルバー定義を追加
-2. `../resolvers/` ディレクトリにJavaScriptファイルを作成
-
-```hcl
-# 新しいリゾルバー例
-resource "aws_appsync_resolver" "get_user_profile" {
-  api_id      = aws_appsync_graphql_api.chat_api.id
-  field       = "getUserProfile"
-  type        = "Query"
-  data_source = aws_appsync_datasource.user_profile_table.name
-  
-  code = file("${path.module}/../resolvers/Query.getUserProfile.js")
-  
-  runtime {
-    name            = "APPSYNC_JS"
-    runtime_version = "1.0.0"
-  }
-}
-```
-
----
-
-## 🔍 トラブルシューティング
-
-### **よくある問題**
-
-#### 1. **AWS認証エラー**
-```bash
-# AWS認証状況確認
-aws sts get-caller-identity
-
-# AWS認証情報設定
-aws configure
-```
-
-#### 2. **リージョン設定ミス**
-```bash
-# 現在のリージョン確認
-aws configure get region
-
-# terraform.tfvarsでリージョン確認
-grep aws_region terraform.tfvars
-```
-
-#### 3. **リソース名重複エラー**
-```bash
-# project_nameを変更
-# terraform.tfvarsを編集
-project_name = "chat-app-unique-name"
-```
-
-#### 4. **変数が見つからないエラー**
-```bash
-# main.tfで定義されている変数を確認
-grep "variable" main.tf
-
-# terraform.tfvarsに必要な変数を追加
-echo 'project_name = "my-chat-app"' >> terraform.tfvars
-echo 'aws_region = "ap-northeast-1"' >> terraform.tfvars
-```
-
-### **ログ確認**
-
-```bash
-# Terraformデバッグログ
-export TF_LOG=DEBUG
-terraform apply
-
-# AppSync CloudWatchログ確認（AWS CLI）
-aws logs describe-log-groups --log-group-name-prefix "/aws/appsync"
-```
-
----
-
-## 📝 注意事項
-
-### **セキュリティ**
-- `terraform.tfvars` に機密情報を含めない
-- IAMロールは最小権限の原則
-- 本番環境では削除保護を有効化
-
-### **コスト管理**
-- DynamoDB は `PAY_PER_REQUEST` で従量課金
-- 不要なリソースは定期的に削除
-- CloudWatch ログの保持期間を適切に設定
-
-### **バックアップ**
-- DynamoDB Point-in-time recovery を有効化推奨
-- Terraform state ファイルの安全な管理
-- 重要な変更前はバックアップを取得
-
----
-
-## 🔗 関連リンク
-
-- [Terraform AWS Provider Documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- [AWS AppSync Documentation](https://docs.aws.amazon.com/appsync/)
-- [AWS DynamoDB Documentation](https://docs.aws.amazon.com/dynamodb/)
-- [AWS Cognito Documentation](https://docs.aws.amazon.com/cognito/)
-
----
-
-このインフラストラクチャにより、スケーラブルで安全なAWS AppSync チャットアプリケーションを構築できます。
+## パフォーマンス最適化
+
+### DynamoDB最適化
+
+1. **アクセスパターンの最適化**:
+   - ホットパーティションの回避
+   - 効率的なクエリ設計
+
+2. **コスト最適化**:
+   - オンデマンド課金の使用
+   - TTLによるデータライフサイクル管理
+
+### Lambda最適化
+
+1. **コールドスタート対策**:
+   - プロビジョニング済み同時実行
+   - 適切なメモリサイズ設定
+
+2. **実行時間最適化**:
+   - 不要なライブラリの削除
+   - 接続プールの活用
+
+## 関連ドキュメント
+
+- [API設計詳細](../design/API設計詳細.md)
+- [データベース設計詳細](../design/データベース設計詳細.md)
+- [デプロイメント動作確認ガイド](../guides/デプロイメント動作確認ガイド.md)
+- [システムアーキテクチャ図集](../architecture/システムアーキテクチャ図集.md)

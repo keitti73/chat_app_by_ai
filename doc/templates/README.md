@@ -3,18 +3,26 @@
 このディレクトリには、AWS AppSync チャットアプリ開発で使用する各種テンプレートファイルが含まれています。
 テンプレートは機能別に分割され、必要な部分だけを参照できるように整理されています。
 
-## 📁 テンプレートファイル一覧
+## � 最新更新情報
+
+> **🆕 2024年インフラ最適化対応**
+> - Terraformテンプレートに最適化構成を反映
+> - Lambdaリゾルバーテンプレートにモニタリング機能を追加
+> - セキュリティベストプラクティスを全テンプレートに適用
+> - JavaScript リゾルバーにエラーハンドリング強化
+
+## �📁 テンプレートファイル一覧
 
 ### 🔗 GraphQL関連
 - [`graphql-schema-template.md`](./graphql-schema-template.md) - GraphQLスキーマ定義のテンプレート
 
 ### 🧠 JavaScript リゾルバー関連
-- [`javascript-resolver-basic-template.md`](./javascript-resolver-basic-template.md) - 基本的なCRUD操作リゾルバー
-- [`javascript-resolver-advanced-template.md`](./javascript-resolver-advanced-template.md) - 高度なクエリ・検索・統計リゾルバー
+- [`javascript-resolver-basic-template.md`](./javascript-resolver-basic-template.md) - 基本的なCRUD操作リゾルバー（最適化版）
+- [`javascript-resolver-advanced-template.md`](./javascript-resolver-advanced-template.md) - 高度なクエリ・検索・統計リゾルバー（最適化版）
 - [`javascript-resolver-template.md`](./javascript-resolver-template.md) - 完全版リゾルバーテンプレート（参考用）
 
 ### 🚀 Lambda リゾルバー関連
-- [`lambda-resolver-template.md`](./lambda-resolver-template.md) - 🆕 AI機能・外部サービス連携リゾルバー
+- [`lambda-resolver-template.md`](./lambda-resolver-template.md) - 🆕 AI機能・外部サービス連携リゾルバー（CloudWatch統合）
 
 ### ⚛️ React フロントエンド関連
 - [`react-graphql-template.md`](./react-graphql-template.md) - GraphQL操作（クエリ・ミューテーション・サブスクリプション）
@@ -24,7 +32,7 @@
 - [`react-frontend-template.md`](./react-frontend-template.md) - 完全版フロントエンドテンプレート（参考用）
 
 ### 🏗️ Terraform関連
-- [`terraform-template.md`](./terraform-template.md) - AWS インフラ構築用 Terraform テンプレート
+- [`terraform-template.md`](./terraform-template.md) - AWS インフラ構築用 Terraform テンプレート（最適化版）
 
 ## 🎯 使用ガイド
 
