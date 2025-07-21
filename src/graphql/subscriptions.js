@@ -1,22 +1,37 @@
+// =================================================================
+// GraphQL サブスクリプション集
+// =================================================================
+// サブスクリプションとは「リアルタイム通知」のためのGraphQL文です
+// クエリが「データを読む」、ミューテーションが「データを変更する」なら
+// サブスクリプションは「データが変更されたら教えて」という仕組みです
+//
+// LINEで新しいメッセージが来たら通知が来るのと同じように、
+// チャットアプリで新しいメッセージが投稿されたら自動で画面に表示されます
+
+// 新しいルームが作成された時の通知を受け取るサブスクリプション
+// 「onRoomCreated」という名前で、誰かが新しいルームを作った時に教えてもらいます
 export const onRoomCreated = /* GraphQL */ `
   subscription OnRoomCreated {
     onRoomCreated {
-      id
-      name
-      owner
-      createdAt
+      id          # 作成されたルームの識別番号
+      name        # 作成されたルームの名前
+      owner       # 作成されたルームの所有者
+      createdAt   # 作成された日時
     }
   }
 `;
 
+// 特定のルームに新しいメッセージが投稿された時の通知を受け取るサブスクリプション
+// 「onMessagePosted」という名前で、指定したルームに新しいメッセージが来たら教えてもらいます
+// $roomId: ID! = どのルームを監視するか（必須）
 export const onMessagePosted = /* GraphQL */ `
   subscription OnMessagePosted($roomId: ID!) {
     onMessagePosted(roomId: $roomId) {
-      id
-      text
-      user
-      createdAt
-      roomId
+      id          # 投稿されたメッセージの識別番号
+      text        # 投稿されたメッセージの内容
+      user        # 投稿した人の名前
+      createdAt   # 投稿された日時
+      roomId      # どのルームに投稿されたか
     }
   }
 `;

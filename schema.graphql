@@ -1,37 +1,72 @@
-# Message型: チャットメッセージ
+# =================================================================
+# GraphQL スキーマ定義ファイル
+# =================================================================
+# スキーマとは「データの設計図」のことです
+# このファイルでは、チャットアプリで使うデータの形や
+# どんな操作ができるかを定義しています
+# 
+# 例えば「メッセージにはどんな情報が入るか」
+# 「どうやって新しいメッセージを送るか」などを決めています
+
+# Message型: チャットメッセージのデータ構造
+# 「一つのメッセージにはこんな情報が入っているよ」という定義
 type Message {
-  id: ID!
-  text: String!
-  user: String!
-  createdAt: AWSDateTime!
-  roomId: ID!
+  id: ID!              # メッセージの識別番号（必須、重複しない）
+  text: String!        # メッセージの本文（必須）
+  user: String!        # メッセージを送った人の名前（必須）
+  createdAt: AWSDateTime!  # メッセージが作られた日時（必須、AWS形式）
+  roomId: ID!          # どのルームのメッセージか（必須）
 }
 
-# Room型: チャットルーム
+# Room型: チャットルームのデータ構造
+# 「一つのルームにはこんな情報が入っているよ」という定義
 type Room {
-  id: ID!
-  name: String!
-  owner: String!
-  createdAt: AWSDateTime!
-  messages: [Message]
+  id: ID!              # ルームの識別番号（必須、重複しない）
+  name: String!        # ルームの名前（必須）
+  owner: String!       # ルームを作った人の名前（必須）
+  createdAt: AWSDateTime!  # ルームが作られた日時（必須、AWS形式）
+  messages: [Message]  # このルームにあるメッセージの一覧（配列、任意）
 }
 
-# Mutation: 投稿・ルーム作成
+# Mutation: データを変更する操作の定義
+# 「新しいデータを作ったり、既存のデータを変更したりする操作」
 type Mutation {
+  # 新しいルームを作る操作
+  # name（ルーム名）を受け取って、Room型のデータを返す
   createRoom(name: String!): Room
+  
+  # 新しいメッセージを投稿する操作
+  # roomId（どのルームか）とtext（メッセージ内容）を受け取って、Message型のデータを返す
   postMessage(roomId: ID!, text: String!): Message
 }
 
-# Query: 取得系
+# Query: データを取得する操作の定義
+# 「既存のデータを読み取る操作」
 type Query {
+  # 自分が作ったルームの一覧を取得
   myOwnedRooms: [Room]
+  
+  # 自分が参加しているルームの一覧を取得
   myActiveRooms: [Room]
+  
+  # 特定のルームの情報を取得
+  # id（ルームID）を受け取って、Room型のデータを返す
   getRoom(id: ID!): Room
+  
+  # 特定のルームのメッセージ一覧を取得
+  # roomId（ルームID）と limit（取得件数、任意）を受け取って、Message型の配列を返す
   listMessages(roomId: ID!, limit: Int): [Message]
 }
 
-# Subscription: リアルタイム受信
+# Subscription: リアルタイム通知の定義
+# 「データが変更されたら自動で教えてくれる操作」
 type Subscription {
+  # 新しいルームが作られた時の通知
+  # @aws_subscribe は「createRoomミューテーションが実行されたら通知して」という意味
   onRoomCreated: Room @aws_subscribe(mutations: ["createRoom"])
+  
+  # 特定のルームに新しいメッセージが投稿された時の通知
+  # roomId（どのルームを監視するか）を受け取る
+  # @aws_subscribe は「postMessageミューテーションが実行されたら通知して」という意味
   onMessagePosted(roomId: ID!): Message @aws_subscribe(mutations: ["postMessage"])
 }
