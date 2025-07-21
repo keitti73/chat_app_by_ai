@@ -29,27 +29,27 @@ classDiagram
     class Query {
         +myOwnedRooms() Room[]
         +myActiveRooms() Room[]
-        +getRoom(id: ID) Room
-        +listMessages(roomId: ID, limit: Int) Message[]
+        +getRoom(id ID) Room
+        +listMessages(roomId ID, limit Int) Message[]
     }
     
     class Mutation {
-        +createRoom(name: String) Room
-        +postMessage(roomId: ID, text: String) Message
+        +createRoom(name String) Room
+        +postMessage(roomId ID, text String) Message
     }
     
     class Subscription {
         +onRoomCreated() Room
-        +onMessagePosted(roomId: ID) Message
+        +onMessagePosted(roomId ID) Message
     }
     
-    Room ||--o{ Message : contains
-    Query ..> Room : returns
-    Query ..> Message : returns
-    Mutation ..> Room : creates
-    Mutation ..> Message : creates
-    Subscription ..> Room : notifies
-    Subscription ..> Message : notifies
+    Room "1" --> "0..*" Message : contains
+    Query --> Room : returns
+    Query --> Message : returns
+    Mutation --> Room : creates
+    Mutation --> Message : creates
+    Subscription --> Room : notifies
+    Subscription --> Message : notifies
 ```
 
 ## 📊 型定義詳細
@@ -354,29 +354,19 @@ erDiagram
         string text
         string user
         datetime createdAt
-        string roomId
+        string roomId FK
     }
     
-    OwnerIndex {
-        string owner PK
-        datetime createdAt SK
-    }
-    
-    UserIndex {
-        string user PK
-        datetime createdAt SK
-    }
-    
-    RoomIndex {
-        string roomId PK
-        datetime createdAt SK
-    }
-    
-    Room ||--o{ OwnerIndex : "owner-index"
-    Message ||--o{ UserIndex : "user-index"
-    Message ||--o{ RoomIndex : "room-index"
-    Room ||--o{ Message : "contains"
+    Room ||--o{ Message : "roomId"
 ```
+
+**GSI設計詳細**:
+
+| GSI名 | パーティションキー | ソートキー | 用途 |
+|-------|------------------|-----------|------|
+| `owner-index` | owner | createdAt | 自分が作成したルーム検索 |
+| `user-index` | user | createdAt | 自分が投稿したメッセージ検索 |
+| `room-index` | roomId | createdAt | ルーム内メッセージ時系列取得 |
 
 ### クエリ最適化パターン
 
