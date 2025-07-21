@@ -469,31 +469,6 @@ aws dynamodb scan --table-name Message --limit 10
 - 📈 **CloudWatch 最適化ガイド**: https://docs.aws.amazon.com/AmazonCloudWatch/
 - 🔍 **AWS X-Ray による分散トレーシング**: https://docs.aws.amazon.com/xray/
 
-## 💡 コントリビューション・フィードバック
-
-### 貢献方法
-1. 🍴 **Fork**: このリポジトリをフォーク
-2. 🌿 **ブランチ作成**: `git checkout -b feature/amazing-feature`
-3. 💻 **実装**: 機能追加・バグ修正・ドキュメント改善
-4. 🧪 **テスト**: 変更内容をテスト
-5. 📝 **コミット**: `git commit -m 'Add some amazing feature'`
-6. 🚀 **プッシュ**: `git push origin feature/amazing-feature`
-7. 🔄 **プルリクエスト**: GitHub でプルリクエストを作成
-
-### フィードバック歓迎
-- 🐛 **バグ報告**: Issues でバグを報告
-- 💡 **機能要望**: 新機能のアイデアを共有
-- 📚 **ドキュメント改善**: わかりにくい箇所の指摘
-- 🎯 **パフォーマンス改善**: 最適化の提案
-
-## 📄 ライセンス・お問い合わせ
-
-- 🆓 **ライセンス**: MIT License - 学習・個人利用・商用利用自由
-- 💬 **質問・相談**: [GitHub Issues](https://github.com/your-repo/issues) でお気軽にどうぞ
-- 🤝 **コラボレーション**: プルリクエストや機能提案大歓迎！
-- 📧 **直接連絡**: [your-email@example.com](mailto:your-email@example.com)
-
----
 
 **🌟 Happy Coding! モダンなクラウドネイティブ開発を楽しく学びましょう！ 🌟**
 
