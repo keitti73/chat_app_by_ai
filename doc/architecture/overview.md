@@ -39,60 +39,67 @@
 ### 全体アーキテクチャ図
 
 ```mermaid
-architecture-beta
-    group client(internet)[Client Tier]
-    group presentation(server)[Presentation Tier] 
-    group application(cloud)[Application Tier]
-    group authentication(cloud)[Authentication Tier]
-    group persistence(database)[Persistence Tier]
-    group infrastructure(server)[Infrastructure Tier]
-
-    service browser(internet)[Web Browser] in client
-    service reactApp(internet)[React SPA] in presentation
-    service vite(server)[Vite Dev Server] in presentation
-    service amplify(server)[AWS Amplify Client] in presentation
+flowchart TB
+    subgraph Client["Client Tier"]
+        Browser["🌐 Web Browser"]
+    end
     
-    service appsync(cloud)[AppSync GraphQL API] in application
-    service pipelineResolvers(server)[Pipeline Resolvers] in application
-    service jsResolvers(server)[JavaScript Resolvers] in application
+    subgraph Presentation["Presentation Tier"]
+        ReactApp["⚛️ React SPA"]
+        Vite["⚡ Vite Dev Server"]
+        Amplify["📡 AWS Amplify Client"]
+    end
     
-    service cognitoUserPool(cloud)[Cognito User Pool] in authentication
-    service cognitoIdentity(cloud)[Cognito Identity Pool] in authentication
-    service jwtTokens(server)[JWT Tokens] in authentication
+    subgraph Application["Application Tier"]
+        AppSync["🚀 AppSync GraphQL API"]
+        Pipeline["⚙️ Pipeline Resolvers"]
+        JSResolvers["📜 JavaScript Resolvers"]
+    end
     
-    service dynamoRooms(database)[DynamoDB Room Table] in persistence
-    service dynamoMessages(database)[DynamoDB Message Table] in persistence
-    service gsiOwner(disk)[Owner Index] in persistence
-    service gsiUser(disk)[User Activity Index] in persistence
-    service gsiRoom(disk)[Room Message Index] in persistence
+    subgraph Authentication["Authentication Tier"]
+        UserPool["👥 Cognito User Pool"]
+        IdentityPool["🔐 Cognito Identity Pool"]
+        JWT["🎟️ JWT Tokens"]
+    end
     
-    service terraform(server)[Terraform] in infrastructure
-    service cloudwatch(server)[CloudWatch] in infrastructure
-    service iamRoles(server)[IAM Roles] in infrastructure
-
-    browser:R --> L:reactApp
-    reactApp:R --> L:amplify
-    reactApp:B --> T:vite
-    amplify:R --> L:appsync
-    appsync:B --> T:cognitoUserPool
-    appsync:B --> T:cognitoIdentity
-    cognitoUserPool:R --> L:jwtTokens
-    appsync:R --> L:pipelineResolvers
-    appsync:R --> L:jsResolvers
-    pipelineResolvers:B --> T:dynamoRooms
-    pipelineResolvers:B --> T:dynamoMessages
-    jsResolvers:B --> T:dynamoRooms
-    jsResolvers:B --> T:dynamoMessages
-    dynamoRooms:R --> L:gsiOwner
-    dynamoMessages:R --> L:gsiUser
-    dynamoMessages:R --> L:gsiRoom
-    terraform:T --> B:appsync
-    terraform:T --> B:dynamoRooms
-    terraform:T --> B:dynamoMessages
-    terraform:T --> B:cognitoUserPool
-    terraform:T --> B:iamRoles
-    cloudwatch:L --> R:appsync
-    iamRoles:T --> B:appsync
+    subgraph Persistence["Persistence Tier"]
+        DynamoRooms["📊 DynamoDB Room Table"]
+        DynamoMessages["💬 DynamoDB Message Table"]
+        GSIOwner["📋 Owner Index"]
+        GSIUser["👤 User Activity Index"]
+        GSIRoom["🏠 Room Message Index"]
+    end
+    
+    subgraph Infrastructure["Infrastructure Tier"]
+        Terraform["🏗️ Terraform"]
+        CloudWatch["📈 CloudWatch"]
+        IAMRoles["🔒 IAM Roles"]
+    end
+    
+    %% Connection flows
+    Browser --> ReactApp
+    ReactApp --> Amplify
+    ReactApp --> Vite
+    Amplify --> AppSync
+    AppSync --> UserPool
+    AppSync --> IdentityPool
+    UserPool --> JWT
+    AppSync --> Pipeline
+    AppSync --> JSResolvers
+    Pipeline --> DynamoRooms
+    Pipeline --> DynamoMessages
+    JSResolvers --> DynamoRooms
+    JSResolvers --> DynamoMessages
+    DynamoRooms --> GSIOwner
+    DynamoMessages --> GSIUser
+    DynamoMessages --> GSIRoom
+    Terraform --> AppSync
+    Terraform --> DynamoRooms
+    Terraform --> DynamoMessages
+    Terraform --> UserPool
+    Terraform --> IAMRoles
+    CloudWatch --> AppSync
+    IAMRoles --> AppSync
 ```
 
 #### 🎯 最適化されたアーキテクチャの特徴
@@ -388,13 +395,6 @@ flowchart TD
 - **絵文字・リアクション**: Message拡張
 - **プライベートルーム**: 招待制＋認可ロジック
 - **通知機能**: SNS + Push Notification
-
-### パフォーマンス最適化
-
-- **DynamoDB設計見直し**: 複合GSI、パーティション分散
-- **GraphQL最適化**: DataLoader、N+1問題解決
-- **CDN活用**: CloudFront + S3で静的コンテンツ配信
-- **キャッシュ戦略**: AppSync Cache、ブラウザキャッシュ
 
 ### 開発効率向上
 

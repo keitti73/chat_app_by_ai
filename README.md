@@ -1,6 +1,72 @@
 # 🌟 AWS AppSync×DynamoDB リアルタイムチャットアプリ（品質改善版）
 
-このプロジェクトは、**Amazon Web Services (AWS)** フルマネージドサービス（AppSync, DynamoDB, Cognito）＋IaC（Terraform）＋React（Amplify）で実装する**Slack風リアルタイムチャットアプリ**の学習用リポジトリです。
+このプロジェクトは、**Amazon Web Services (AWS)** フルマネージドサービス（AppSync, DynamoDB, Cognito）＋IaC（Terraf### 🏗️ Infrastructure Tier (インフラ層)**
+- **Terraform**: Infrastructure as Code
+- **CloudWatch**: ログ・監視
+- **IAM Roles**: 権限制御・セキュリティ
+
+## 📋 GraphQLスキーマ概要
+
+このアプリで使用するGraphQLスキーマの基本構成：
+
+```graphql
+# 主要な型定義
+type Room {
+  id: ID!              # ルーム識別番号
+  name: String!        # ルーム名
+  owner: String!       # 作成者
+  createdAt: AWSDateTime!  # 作成日時
+}
+
+type Message {
+  id: ID!              # メッセージ識別番号
+  text: String!        # メッセージ本文
+  user: String!        # 送信者
+  createdAt: AWSDateTime!  # 送信日時
+  roomId: ID!          # 所属ルーム
+}
+
+# データ操作
+type Query {
+  myOwnedRooms: [Room]     # 自分が作ったルーム一覧
+  myActiveRooms: [Room]    # 参加中のルーム一覧
+  listMessages(roomId: ID!, limit: Int): [Message]  # メッセージ履歴
+}
+
+type Mutation {
+  createRoom(name: String!): Room           # ルーム作成
+  postMessage(roomId: ID!, text: String!): Message  # メッセージ送信
+}
+
+# リアルタイム通知
+type Subscription {
+  onRoomCreated: Room                       # 新着ルーム通知
+  onMessagePosted(roomId: ID!): Message     # 新着メッセージ通知
+}
+```
+
+**📚 詳細情報**:
+- **[GraphQLスキーマ初心者ガイド](./doc/guides/GraphQLスキーマ初心者ガイド.md)** - 身近な例で理解
+- **[GraphQLスキーマ設計書](./doc/design/GraphQLスキーマ設計書.md)** - 技術仕様詳細
+- **[GraphQLクエリ実践ガイド](./doc/guides/GraphQLクエリ実践ガイド.md)** - 実装方法
+
+### データフロー図eact（Amplify）で実装する**Slack風リアルタイムチャットアプリ**の学習用リポジトリです。
+
+## 📚 ドキュメント
+
+詳細なドキュメントは **[doc/](./doc/)** フォルダに整理されています：
+
+### 🚀 クイックスタート
+- **[システム概要](./doc/architecture/overview.md)** - プロジェクト全体像
+- **[設計概要](./doc/design/overview.md)** - データベース・API設計
+- **[GraphQLスキーマ初心者ガイド](./doc/guides/GraphQLスキーマ初心者ガイド.md)** - GraphQL基礎を身近な例で理解
+- **[開発ガイド](./doc/guides/API追加ガイド.md)** - 新機能開発手順
+
+### 📖 詳細ドキュメント
+- **[アーキテクチャ](./doc/architecture/)** - システム全体のアーキテクチャ
+- **[設計仕様](./doc/design/)** - データベース・API設計詳細（GraphQLスキーマ設計書含む）
+- **[開発ガイド](./doc/guides/)** - 開発・運用手順（GraphQL実践ガイド含む）
+- **[テンプレート](./doc/templates/)** - 実装テンプレート集
 
 ## 🏆 プロジェクト品質バッジ
 
@@ -59,60 +125,38 @@
 ### 🏗️ 全体アーキテクチャ図
 
 ```mermaid
-architecture-beta
-    group client(internet)[Client Tier]
-    group presentation(server)[Presentation Tier] 
-    group application(cloud)[Application Tier]
-    group authentication(cloud)[Authentication Tier]
-    group persistence(database)[Persistence Tier]
-    group infrastructure(server)[Infrastructure Tier]
-
-    service browser(internet)[Web Browser] in client
-    service reactApp(internet)[React SPA] in presentation
-    service vite(server)[Vite Dev Server] in presentation
-    service amplify(server)[AWS Amplify Client] in presentation
+flowchart TB
+    subgraph Client["🌐 Client Tier"]
+        Browser["Web Browser"]
+    end
     
-    service appsync(cloud)[AppSync GraphQL API] in application
-    service pipelineResolvers(server)[Pipeline Resolvers] in application
-    service jsResolvers(server)[JavaScript Resolvers] in application
+    subgraph Frontend["⚛️ Frontend Tier"]
+        React["React SPA"]
+        Vite["Vite Dev Server"]
+        Amplify["AWS Amplify"]
+    end
     
-    service cognitoUserPool(cloud)[Cognito User Pool] in authentication
-    service cognitoIdentity(cloud)[Cognito Identity Pool] in authentication
-    service jwtTokens(server)[JWT Tokens] in authentication
+    subgraph Backend["☁️ Backend Tier"]
+        AppSync["AppSync GraphQL API"]
+        Resolvers["JavaScript Resolvers"]
+    end
     
-    service dynamoRooms(database)[DynamoDB Room Table] in persistence
-    service dynamoMessages(database)[DynamoDB Message Table] in persistence
-    service gsiOwner(disk)[Owner Index] in persistence
-    service gsiUser(disk)[User Activity Index] in persistence
-    service gsiRoom(disk)[Room Message Index] in persistence
+    subgraph Auth["🔐 Authentication"]
+        Cognito["Cognito User Pool"]
+    end
     
-    service terraform(server)[Terraform] in infrastructure
-    service cloudwatch(server)[CloudWatch] in infrastructure
-    service iamRoles(server)[IAM Roles] in infrastructure
-
-    browser:R --> L:reactApp
-    reactApp:R --> L:amplify
-    reactApp:B --> T:vite
-    amplify:R --> L:appsync
-    appsync:B --> T:cognitoUserPool
-    appsync:B --> T:cognitoIdentity
-    cognitoUserPool:R --> L:jwtTokens
-    appsync:R --> L:pipelineResolvers
-    appsync:R --> L:jsResolvers
-    pipelineResolvers:B --> T:dynamoRooms
-    pipelineResolvers:B --> T:dynamoMessages
-    jsResolvers:B --> T:dynamoRooms
-    jsResolvers:B --> T:dynamoMessages
-    dynamoRooms:R --> L:gsiOwner
-    dynamoMessages:R --> L:gsiUser
-    dynamoMessages:R --> L:gsiRoom
-    terraform:T --> B:appsync
-    terraform:T --> B:dynamoRooms
-    terraform:T --> B:dynamoMessages
-    terraform:T --> B:cognitoUserPool
-    terraform:T --> B:iamRoles
-    cloudwatch:L --> R:appsync
-    iamRoles:T --> B:appsync
+    subgraph Data["🗄️ Data Tier"]
+        DynamoDB["DynamoDB"]
+        GSI["Global Secondary Indexes"]
+    end
+    
+    Browser --> React
+    React --> Amplify
+    Amplify --> AppSync
+    AppSync --> Cognito
+    AppSync --> Resolvers
+    Resolvers --> DynamoDB
+    DynamoDB --> GSI
 ```
 
 #### 🎯 アーキテクチャの特徴
@@ -225,81 +269,142 @@ npm run dev
 
 ```
 .
-├── doc/                           # 📚 詳細ドキュメント・テンプレート
-│   ├── readme_app_sync_chat_app.md    # 🏗️ 詳細技術仕様書（実装例・コード含む）
-│   ├── API追加ガイド.md               # 📖 API追加の使い方ガイド
-│   ├── API追加テンプレート.md          # 🚀 クイックスタートガイド
-│   └── templates/                    # 📋 各種テンプレートファイル（機能別分割済み）
-│       ├── README.md                 # 📚 テンプレート使用ガイド・一覧
-│       ├── graphql-schema-template.md
-│       ├── terraform-template.md
-│       ├── javascript-resolver-basic-template.md      # 🆕 基本CRUD操作
-│       ├── javascript-resolver-advanced-template.md   # 🆕 高度なクエリ・統計
-│       ├── javascript-resolver-template.md            # 📖 完全版（参考用）
-│       ├── react-graphql-template.md                  # 🆕 GraphQL操作専用
-│       ├── react-components-template.md               # 🆕 UIコンポーネント専用
-│       ├── react-forms-template.md                    # 🆕 フォーム処理専用
-│       ├── react-styling-template.md                  # 🆕 CSS・スタイリング専用
-│       └── react-frontend-template.md                 # 📖 完全版（参考用）
+├── doc/                           # 📚 詳細ドキュメント・ガイド・テンプレート
+│   ├── README.md                  # 📖 ドキュメント全体ガイド
+│   ├── architecture/              # 🏗️ システムアーキテクチャ
+│   │   ├── README.md              # アーキテクチャドキュメント案内
+│   │   ├── overview.md            # プロジェクト全体概要
+│   │   ├── システムアーキテクチャ図集.md    # 各種アーキテクチャ図
+│   │   └── システム処理フロー詳細解説.md    # 処理フロー詳細
+│   ├── design/                    # 🎯 設計仕様書
+│   │   ├── README.md              # 設計ドキュメント案内
+│   │   ├── overview.md            # 設計概要
+│   │   ├── データベース設計詳細.md   # DynamoDB設計詳細
+│   │   ├── API設計詳細.md          # GraphQL API設計
+│   │   ├── GraphQLスキーマ設計書.md # GraphQLスキーマ技術仕様（🆕）
+│   │   └── データフロー設計書.md     # データフロー仕様
+│   ├── guides/                    # 📋 開発・運用ガイド
+│   │   ├── README.md              # ガイドドキュメント案内
+│   │   ├── API追加ガイド.md        # 新機能開発の詳細手順
+│   │   ├── API追加テンプレート.md   # クイックスタートガイド
+│   │   ├── GraphQLスキーマ初心者ガイド.md  # GraphQL基礎解説（🆕）
+│   │   └── GraphQLクエリ実践ガイド.md      # 実装コード実践（🆕）
+│   └── templates/                 # � 実装テンプレート集
+│       ├── README.md              # テンプレート使用ガイド・一覧
+│       ├── graphql-schema-template.md       # GraphQLスキーマ設計
+│       ├── terraform-template.md            # Terraformテンプレート
+│       ├── javascript-resolver-basic-template.md      # 基本CRUD操作
+│       ├── javascript-resolver-advanced-template.md   # 高度なクエリ・統計
+│       ├── javascript-resolver-template.md            # 完全版（参考用）
+│       ├── react-graphql-template.md                  # GraphQL操作専用
+│       ├── react-components-template.md               # UIコンポーネント専用
+│       ├── react-forms-template.md                    # フォーム処理専用
+│       ├── react-styling-template.md                  # CSS・スタイリング専用
+│       └── react-frontend-template.md                 # 完全版（参考用）
 ├── src/                           # 📱 アプリの画面とロジック
 │   ├── components/                # 🧩 画面の部品たち
+│   │   ├── README.md              # コンポーネント構成説明
 │   │   ├── MyRooms.jsx           # 🏠 ルーム一覧画面
 │   │   ├── ChatRoom.jsx          # 💬 チャット画面
 │   │   └── AuthForm.jsx          # 🔐 ログイン・新規登録画面
 │   ├── graphql/                   # 📡 サーバーとの通信設定
+│   │   ├── README.md              # GraphQL設定説明
 │   │   ├── queries.js            # 📖 データを「読む」ための命令
 │   │   ├── mutations.js          # ✏️ データを「変更する」ための命令
 │   │   └── subscriptions.js      # 🔔 リアルタイム通知の設定
 │   ├── App.jsx                    # 🏠 アプリ全体をコントロールするメインファイル
 │   └── main.jsx                   # 🚀 アプリの起動ファイル
 ├── infra/                         # ☁️ AWS（雲サービス）の設定
+│   ├── README.md                  # インフラ構成説明
 │   ├── main.tf                   # ⚙️ 基本設定
 │   ├── dynamodb.tf               # 🗄️ データベースの設定
 │   ├── appsync.tf                # 📡 API サーバーの設定
 │   ├── cognito.tf                # 🔐 ユーザー認証の設定
 │   ├── resolvers.tf              # 🔄 データ処理ロジックの設定
-│   └── outputs.tf                # 📋 作成したサービスの情報出力
+│   ├── outputs.tf                # 📋 作成したサービスの情報出力
+│   └── terraform.tfvars.example  # 環境変数設定例
 ├── resolvers/                     # 🧠 サーバー側のデータ処理ロジック
+│   ├── README.md                  # リゾルバー構成説明
 │   ├── Mutation_createRoom.js        # ルーム作成処理
 │   ├── Mutation_postMessage.js       # メッセージ投稿処理
 │   ├── Query_getRoom.js              # ルーム情報取得
 │   ├── Query_listMessages.js         # メッセージ一覧取得
 │   ├── Query_myOwnedRooms.js         # 自分のルーム一覧
-│   ├── Pipeline_myActiveRooms_1_getMessages.js  # 🆕 パイプライン第1段階
-│   └── Pipeline_myActiveRooms_2_getRooms.js     # 🆕 パイプライン第2段階
-├── schema.graphql                 # 📝 データの設計図
+│   ├── Query_myActiveRooms.js        # 参加中ルーム一覧（単体版）
+│   ├── Pipeline_myActiveRooms_1_getMessages.js  # パイプライン第1段階
+│   └── Pipeline_myActiveRooms_2_getRooms.js     # パイプライン第2段階
+├── public/                        # 🌐 静的ファイル（アイコン等）
+├── schema.graphql                 # 📝 データの設計図（GraphQLスキーマ）
+├── deploy.sh                      # 🚀 自動デプロイスクリプト
 ├── eslint.config.js              # 🔍 コード品質チェック設定
-├── PROJECT_FIXES_REPORT.md       # 📋 品質改善レポート
 ├── vite.config.js                # ⚡ 開発用ツールの設定
-└── package.json                   # 📦 プロジェクト依存関係（ES Modules対応）
+├── package.json                   # 📦 プロジェクト依存関係（ES Modules対応）
+├── index.html                     # 🌐 アプリのメインHTMLファイル
+└── README.md                      # 📖 このファイル（プロジェクト概要）
 ```
 
 ## 📚 ドキュメント構成
 
+### 🎯 新しい4層ドキュメント構造
+
+**整理済みドキュメント体系**で、学習レベルに応じた効率的な情報アクセスを実現：
+
+#### 📖 [doc/README.md](./doc/README.md) - ドキュメント全体ガイド
+- **目的**: 全ドキュメントの案内・ナビゲーション
+- **機能別推奨フロー**: 初心者→中級者→上級者の学習パス
+- **トラブルシューティング**: 迷った時の解決手順
+
+#### 🏗️ [doc/architecture/](./doc/architecture/) - システムアーキテクチャ
+- **[overview.md](./doc/architecture/overview.md)**: プロジェクト全体概要
+- **[システムアーキテクチャ図集.md](./doc/architecture/システムアーキテクチャ図集.md)**: 各種技術図解
+- **[システム処理フロー詳細解説.md](./doc/architecture/システム処理フロー詳細解説.md)**: 内部動作詳細
+
+#### 🎯 [doc/design/](./doc/design/) - 設計仕様書
+- **[overview.md](./doc/design/overview.md)**: 設計概要
+- **[データベース設計詳細.md](./doc/design/データベース設計詳細.md)**: DynamoDB設計詳細
+- **[API設計詳細.md](./doc/design/API設計詳細.md)**: GraphQL API設計
+- **[GraphQLスキーマ設計書.md](./doc/design/GraphQLスキーマ設計書.md)**: 🆕 技術仕様完全版
+- **[データフロー設計書.md](./doc/design/データフロー設計書.md)**: データフロー仕様
+
+#### 📋 [doc/guides/](./doc/guides/) - 開発・運用ガイド
+- **[API追加ガイド.md](./doc/guides/API追加ガイド.md)**: 新機能開発の詳細手順
+- **[API追加テンプレート.md](./doc/guides/API追加テンプレート.md)**: クイックスタートガイド
+- **[GraphQLスキーマ初心者ガイド.md](./doc/guides/GraphQLスキーマ初心者ガイド.md)**: 🆕 GraphQL入門
+- **[GraphQLクエリ実践ガイド.md](./doc/guides/GraphQLクエリ実践ガイド.md)**: 🆕 実装コード集
+
+#### 🚀 [doc/templates/](./doc/templates/) - 実装テンプレート集
+- **React系**: components, forms, styling, graphql, frontend（完全版）
+- **Resolver系**: basic, advanced, 完全版
+- **インフラ系**: terraform, graphql-schema
+
 ### 学習レベル別ガイド
 
 1. **📖 このREADME**: 全体概要・クイックスタート
-2. **📋 doc/API追加テンプレート.md**: 新機能追加のクイックガイド
-3. **📖 doc/API追加ガイド.md**: 段階的な実装手順（詳細版）
-4. **🏗️ doc/readme_app_sync_chat_app.md**: 技術仕様書（実装例・アーキテクチャ図付き）
-5. **📂 doc/templates/**: 実装用テンプレートファイル集（機能別・難易度別に整理済み）
+2. **� GraphQLスキーマ初心者ガイド**: GraphQLとは何かを身近な例で理解
+3. **�📋 doc/API追加テンプレート.md**: 新機能追加のクイックガイド
+4. **📖 doc/API追加ガイド.md**: 段階的な実装手順（詳細版）
+5. **🎯 GraphQLクエリ実践ガイド**: 実際のコード書き方と実行方法
+6. **🏗️ GraphQLスキーマ設計書**: 技術仕様の完全版（上級者向け）
+7. **📂 doc/templates/**: 実装用テンプレートファイル集（機能別・難易度別に整理済み）
 
 ### 🆕 テンプレート活用方法（改善版）
 
 **新機能追加時の推奨フロー**:
-1. **🔰 初心者**: `doc/templates/README.md` でスキルレベル別ガイドを確認
+1. **🔰 GraphQL初学者**: `GraphQLスキーマ初心者ガイド` でGraphQLの基本理解
 2. **📋 クイックスタート**: `doc/API追加テンプレート.md` で概要把握
-3. **🎯 機能別実装**: 
+3. **🎯 実装実践**: `GraphQLクエリ実践ガイド` で実際のコード書き方を学習
+4. **🎯 機能別実装**: 
    - GraphQL操作 → `react-graphql-template.md`
    - 基本CRUD → `javascript-resolver-basic-template.md`
    - UI画面 → `react-components-template.md` + `react-forms-template.md`
    - スタイリング → `react-styling-template.md`
-4. **📖 詳細手順**: `doc/API追加ガイド.md` で実装の詳細確認
+5. **📖 詳細手順**: `doc/API追加ガイド.md` で実装の詳細確認
+6. **🏗️ 技術仕様**: `GraphQLスキーマ設計書` で設計原理を理解
 
-**🎯 レベル別推奨テンプレート**:
-- **🔰 初心者向け**: basic系テンプレート + components + styling
-- **🚀 中級者向け**: advanced系 + forms + graphql操作
-- **🎯 上級者向け**: 完全版テンプレート + カスタマイズ応用
+**🎯 レベル別推奨ドキュメント**:
+- **🔰 GraphQL初心者**: GraphQLスキーマ初心者ガイド + 基本テンプレート
+- **� 実装初心者**: GraphQLクエリ実践ガイド + basic系テンプレート + components
+- **🎯 開発経験者**: advanced系テンプレート + 詳細設計書 + カスタマイズ応用
 
 ## 🛠 実装されている機能
 
@@ -416,6 +521,11 @@ type Subscription {
   onMessagePosted(roomId: ID!): Message
 }
 ```
+
+**📚 学習リソース**:
+- **初心者向け**: [GraphQLスキーマ初心者ガイド](./doc/guides/GraphQLスキーマ初心者ガイド.md)
+- **実装重視**: [GraphQLクエリ実践ガイド](./doc/guides/GraphQLクエリ実践ガイド.md)
+- **設計詳細**: [GraphQLスキーマ設計書](./doc/design/GraphQLスキーマ設計書.md)
 
 ## 📚 技術の詳細説明
 
@@ -660,12 +770,14 @@ aws dynamodb scan --table-name Message --limit 10
 - 📖 **AWS Well-Architected Framework**: https://aws.amazon.com/architecture/well-architected/
 - 🏛️ **DynamoDB設計パターン**: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/best-practices.html
 - 📡 **GraphQL ベストプラクティス**: https://graphql.org/learn/best-practices/
+- 📚 **GraphQL公式ガイド**: https://graphql.org/learn/
 
 #### 💻 実装技術
 - 📖 **React公式ドキュメント**: https://ja.react.dev/learn
 - ☁️ **AWS AppSync 開発者ガイド**: https://docs.aws.amazon.com/appsync/
 - 🧠 **JavaScript Resolvers**: https://docs.aws.amazon.com/appsync/latest/devguide/resolver-context-reference.html
 - 🏗️ **Terraform AWS Provider**: https://registry.terraform.io/providers/hashicorp/aws/latest/docs
+- 📡 **GraphQL with React**: https://www.apollographql.com/docs/react/
 
 #### 🔐 セキュリティ
 - 🛡️ **Amazon Cognito 開発者ガイド**: https://docs.aws.amazon.com/cognito/
