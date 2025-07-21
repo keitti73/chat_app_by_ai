@@ -104,6 +104,50 @@ C4Container
     UpdateRelStyle(user, web_app, $textColor="blue", $lineColor="blue")
     UpdateRelStyle(web_app, appsync, $textColor="green", $lineColor="green")
     UpdateRelStyle(appsync, dynamodb_rooms, $textColor="orange", $lineColor="orange")
+    UpdateRelStyle(appsync, dynamodb_messages, $textColor="orange", $lineColor="orange")
+```
+
+### データフロー図
+
+```mermaid
+sequenceDiagram
+    participant U as ユーザー
+    participant R as React App
+    participant A as AWS Amplify
+    participant AS as AppSync API
+    participant C as Cognito
+    participant DR as DynamoDB Rooms
+    participant DM as DynamoDB Messages
+    
+    Note over U,DM: 1. ユーザー認証フロー
+    U->>R: ログイン操作
+    R->>A: 認証リクエスト
+    A->>C: ユーザー認証
+    C-->>A: JWT トークン
+    A-->>R: 認証成功
+    
+    Note over U,DM: 2. ルーム作成フロー
+    U->>R: ルーム作成
+    R->>AS: createRoom Mutation
+    AS->>C: JWT 検証
+    AS->>DR: ルームデータ保存
+    AS-->>R: 作成完了
+    AS->>R: onRoomCreated Subscription
+    
+    Note over U,DM: 3. メッセージ送信フロー
+    U->>R: メッセージ入力・送信
+    R->>AS: postMessage Mutation
+    AS->>C: JWT 検証・権限確認
+    AS->>DM: メッセージデータ保存
+    AS-->>R: 送信完了
+    AS->>R: onMessagePosted Subscription
+    
+    Note over U,DM: 4. リアルタイム受信フロー
+    AS->>R: リアルタイム通知 (WebSocket)
+    R->>R: UI 更新
+    R->>U: 新着メッセージ表示
+```
+
 ---
 
 ## 📁 ディレクトリ構成
