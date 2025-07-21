@@ -39,7 +39,7 @@ export default function AuthForm({ onAuthSuccess }) {
 
     try {
       // Cognitoにログイン要求を送信
-      const user = await signIn({
+      await signIn({
         username: formData.email,
         password: formData.password
       });
@@ -81,7 +81,7 @@ export default function AuthForm({ onAuthSuccess }) {
 
     try {
       // Cognitoに新規ユーザー登録要求を送信
-      const { isSignUpComplete, userId, nextStep } = await signUp({
+      const { nextStep } = await signUp({
         username: formData.email,
         password: formData.password,
         options: {

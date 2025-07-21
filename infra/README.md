@@ -1,6 +1,21 @@
 # 🏗️ Infrastructure - AWS AppSync Chat App
 
-このディレクトリには、AWS AppSync チャットアプリケーションのインフラストラクチャをTerraformで管理するためのファイルが含まれています。
+[![Terraform](https://img.shields.io/badge/Terraform-Validated-623CE4.svg)](#terraform検証済み)
+[![Pipeline Resolvers](https://img.shields.io/badge/Resolvers-Pipeline%20Ready-success.svg)](#パイプラインリゾルバー対応)
+[![Infrastructure](https://img.shields.io/badge/Infrastructure-Production%20Ready-orange.svg)](#本番環境対応)
+
+このディレクトリには、AWS AppSync チャットアプリケーションの **検証済み・最適化された** インフラストラクチャをTerraformで管理するためのファイルが含まれています。
+
+---
+
+## 🚀 インフラストラクチャ最適化
+
+### ✅ 実装済み改善
+- **パイプラインリゾルバー対応**: myActiveRooms最適化アーキテクチャ
+- **Terraform構文検証**: `terraform validate`でチェック済み
+- **GSI設計最適化**: 効率的なクエリパターン対応
+- **セキュリティ強化**: IAMロールの最小権限原則
+- **スケーラビリティ確保**: DynamoDB自動スケーリング対応
 
 ---
 

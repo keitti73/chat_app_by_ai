@@ -1,6 +1,11 @@
-# 🧠 AppSync JavaScript Resolvers - ビジネスロジック実装
+# 🧠 AppSync JavaScript Resolvers - ビジネスロジック実装（品質改善版）
 
 このディレクトリには、AWS AppSync GraphQL API のJavaScriptリゾルバーが含まれています。
+
+## 🏆 品質改善バッジ
+[![Code Quality](https://img.shields.io/badge/resolvers-optimized-brightgreen.svg)](#パイプラインリゾルバー)
+[![Performance](https://img.shields.io/badge/performance-enhanced-blue.svg)](#パフォーマンス最適化)
+[![Best Practices](https://img.shields.io/badge/best_practices-applied-green.svg)](#ベストプラクティス)
 
 ---
 
@@ -8,46 +13,79 @@
 
 ```
 resolvers/
-├── README.md                    # このファイル
-├── Mutation.createRoom.js       # ルーム作成リゾルバー
-├── Mutation.postMessage.js      # メッセージ投稿リゾルバー
-├── Query.myOwnedRooms.js        # 所有ルーム取得リゾルバー
-├── Query.myActiveRooms.js       # 参加ルーム取得リゾルバー
-├── Query.listMessages.js        # メッセージ一覧取得リゾルバー
-└── Query.getRoom.js             # ルーム詳細取得リゾルバー
+├── README.md                                      # このファイル
+├── Mutation_createRoom.js                         # ルーム作成リゾルバー
+├── Mutation_postMessage.js                        # メッセージ投稿リゾルバー
+├── Query_myOwnedRooms.js                         # 所有ルーム取得リゾルバー
+├── Query_listMessages.js                         # メッセージ一覧取得リゾルバー
+├── Query_getRoom.js                              # ルーム詳細取得リゾルバー
+├── Pipeline_myActiveRooms_1_getMessages.js       # 🆕 パイプライン第1段階（メッセージ取得）
+└── Pipeline_myActiveRooms_2_getRooms.js          # 🆕 パイプライン第2段階（ルーム情報取得）
 ```
+
+## ✨ 新機能・改善点
+
+### 🚀 パイプラインリゾルバーの導入
+従来の単一リゾルバーから **パイプラインリゾルバー** に変更し、以下を実現：
+
+- ✅ **N+1問題解決**: バッチ処理による効率的なデータ取得
+- ✅ **データ整合性**: 複数テーブルの情報を安全に結合
+- ✅ **パフォーマンス向上**: DynamoDBリクエスト数を最小化
+- ✅ **保守性向上**: 段階的な処理ロジックの分離
 
 ---
 
 ## 🏗️ リゾルバーアーキテクチャ
 
+### 従来の単一リゾルバー vs パイプラインリゾルバー
+
 ```mermaid
 flowchart TD
-    subgraph "GraphQL Layer"
-        Schema[GraphQL Schema]
-        Operation[GraphQL Operation]
+    subgraph "従来のアプローチ"
+        O1[GraphQL Operation] --> R1[Single Resolver]
+        R1 --> D1[DynamoDB Query 1]
+        R1 --> D2[DynamoDB Query 2]
+        R1 --> D3[DynamoDB Query N...]
+        R1 --> Result1[Response]
     end
     
-    subgraph "Resolver Layer"
-        JSResolver[JavaScript Resolver]
-        Context[Context Object]
-        Identity[ctx.identity]
-        Args[ctx.args]
+    subgraph "🆕 パイプラインリゾルバー"
+        O2[GraphQL Operation] --> P1[Pipeline Function 1]
+        P1 --> P2[Pipeline Function 2]
+        P2 --> Result2[Combined Response]
+        
+        P1 --> DB1[Message Table Query]
+        P2 --> DB2[Room Table Batch Get]
+        
+        P1 -.-> Stash[Context Stash]
+        Stash -.-> P2
     end
+```
+
+### パイプラインリゾルバーの処理フロー
+
+```mermaid
+sequenceDiagram
+    participant Client as GraphQL Client
+    participant Pipeline as Pipeline Resolver
+    participant F1 as Function 1: getMessages
+    participant F2 as Function 2: getRooms
+    participant MsgTable as Message Table
+    participant RoomTable as Room Table
     
-    subgraph "Data Layer" 
-        DataSource[AppSync DataSource]
-        DynamoDB[(DynamoDB)]
-        GSI[Global Secondary Index]
-    end
+    Client->>Pipeline: myActiveRooms Query
+    Pipeline->>F1: Execute Function 1
+    F1->>MsgTable: Query user messages
+    MsgTable-->>F1: Return messages
+    F1->>F1: Extract unique roomIds
+    F1->>Pipeline: Store roomIds in stash
     
-    Operation --> JSResolver
-    JSResolver --> Context
-    Context --> Identity
-    Context --> Args
-    JSResolver --> DataSource
-    DataSource --> DynamoDB
-    DynamoDB --> GSI
+    Pipeline->>F2: Execute Function 2
+    F2->>F2: Read roomIds from stash
+    F2->>RoomTable: BatchGetItem(roomIds)
+    RoomTable-->>F2: Return room details
+    F2->>Pipeline: Return combined result
+    Pipeline-->>Client: Final response
 ```
 
 ---

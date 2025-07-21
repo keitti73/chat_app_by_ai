@@ -52,14 +52,14 @@ output "aws_region" {
 output "amplify_config" {
   description = "Configuration for Amplify"
   value = {
-    aws_project_region                = var.aws_region
-    aws_appsync_graphqlEndpoint       = aws_appsync_graphql_api.chat_api.uris["GRAPHQL"]
-    aws_appsync_region                = var.aws_region
-    aws_appsync_authenticationType    = "AMAZON_COGNITO_USER_POOLS"
-    aws_cognito_region               = var.aws_region
-    aws_user_pools_id               = aws_cognito_user_pool.chat_user_pool.id
-    aws_user_pools_web_client_id    = aws_cognito_user_pool_client.chat_client.id
-    aws_cognito_identity_pool_id    = aws_cognito_identity_pool.chat_identity_pool.id
+    aws_project_region             = var.aws_region
+    aws_appsync_graphqlEndpoint    = aws_appsync_graphql_api.chat_api.uris["GRAPHQL"]
+    aws_appsync_region             = var.aws_region
+    aws_appsync_authenticationType = "AMAZON_COGNITO_USER_POOLS"
+    aws_cognito_region             = var.aws_region
+    aws_user_pools_id              = aws_cognito_user_pool.chat_user_pool.id
+    aws_user_pools_web_client_id   = aws_cognito_user_pool_client.chat_client.id
+    aws_cognito_identity_pool_id   = aws_cognito_identity_pool.chat_identity_pool.id
   }
   sensitive = true
 }

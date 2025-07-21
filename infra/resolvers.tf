@@ -43,19 +43,50 @@ resource "aws_appsync_resolver" "my_owned_rooms" {
   code = file("${path.module}/../resolvers/Query_myOwnedRooms.js")
 }
 
-# Query: myActiveRooms (同じリゾルバーを使用、実際の実装では異なるロジック)
+# Query: myActiveRooms (パイプラインリゾルバー)
 resource "aws_appsync_resolver" "my_active_rooms" {
+  api_id = aws_appsync_graphql_api.chat_api.id
+  field  = "myActiveRooms"
+  type   = "Query"
+  kind   = "PIPELINE"
+
+  pipeline_config {
+    functions = [
+      aws_appsync_function.my_active_rooms_get_messages.function_id,
+      aws_appsync_function.my_active_rooms_get_rooms.function_id
+    ]
+  }
+
+  request_template  = "## Start pipeline\n{}"
+  response_template = "$util.toJson($ctx.result)"
+}
+
+# パイプライン関数1: メッセージからルームIDを取得
+resource "aws_appsync_function" "my_active_rooms_get_messages" {
   api_id      = aws_appsync_graphql_api.chat_api.id
-  field       = "myActiveRooms"
-  type        = "Query"
   data_source = aws_appsync_datasource.message_table.name
+  name        = "getMessagesForActiveRooms"
 
   runtime {
     name            = "APPSYNC_JS"
     runtime_version = "1.0.0"
   }
 
-  code = file("${path.module}/../resolvers/Query_myActiveRooms.js")
+  code = file("${path.module}/../resolvers/Pipeline_myActiveRooms_1_getMessages.js")
+}
+
+# パイプライン関数2: ルームIDからルーム情報を取得
+resource "aws_appsync_function" "my_active_rooms_get_rooms" {
+  api_id      = aws_appsync_graphql_api.chat_api.id
+  data_source = aws_appsync_datasource.room_table.name
+  name        = "getRoomsFromIds"
+
+  runtime {
+    name            = "APPSYNC_JS"
+    runtime_version = "1.0.0"
+  }
+
+  code = file("${path.module}/../resolvers/Pipeline_myActiveRooms_2_getRooms.js")
 }
 
 # Query: getRoom

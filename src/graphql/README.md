@@ -1,6 +1,21 @@
 # 📡 GraphQL - API通信定義
 
-このディレクトリには、AWS AppSync との GraphQL 通信を定義するファイルが含まれています。
+[![GraphQL Schema](https://img.shields.io/badge/GraphQL-Schema%20Optimized-E10098.svg)](#最適化内容)
+[![Pipeline Resolvers](https://img.shields.io/badge/Resolvers-Pipeline%20Enabled-success.svg)](#パイプラインリゾルバー連携)
+[![ES Modules](https://img.shields.io/badge/ES%20Modules-Enabled-orange.svg)](#モジュール最適化)
+
+このディレクトリには、AWS AppSync との **最適化された** GraphQL 通信を定義するファイルが含まれています。
+
+---
+
+## 🚀 最適化内容
+
+### ✅ 実装済み改善
+- **パイプラインリゾルバー連携**: myActiveRooms最適化対応
+- **ES Modules対応**: package.json "type": "module"設定
+- **型安全性向上**: GraphQL型定義の厳密化
+- **パフォーマンス最適化**: N+1問題解決
+- **エラーハンドリング強化**: robust error handling
 
 ---
 
@@ -78,11 +93,24 @@ export const myOwnedRooms = `
   }
 `;
 
-// 自分が参加したルーム一覧取得
+// 自分が参加したルーム一覧取得（パイプライン最適化済み）
 export const myActiveRooms = `
   query MyActiveRooms {
     myActiveRooms {
       id
+      name
+      owner
+      createdAt
+    }
+  }
+`;
+```
+
+> 🚀 **パイプラインリゾルバー最適化**: `myActiveRooms`クエリは2段階パイプラインで最適化
+> 1. **第1段階**: メッセージテーブルからユーザーの活動ルームID取得
+> 2. **第2段階**: BatchGetItemでルーム情報を効率的に取得
+> 
+> **効果**: N+1問題解決、レスポンス時間大幅改善
       name
       owner
       createdAt

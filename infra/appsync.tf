@@ -6,9 +6,9 @@ resource "aws_appsync_graphql_api" "chat_api" {
 
   # Cognito認証設定
   user_pool_config {
-    aws_region        = var.aws_region
-    default_action    = "ALLOW"
-    user_pool_id     = aws_cognito_user_pool.chat_user_pool.id
+    aws_region     = var.aws_region
+    default_action = "ALLOW"
+    user_pool_id   = aws_cognito_user_pool.chat_user_pool.id
   }
 
   # 追加認証プロバイダー（API Key も併用可能）

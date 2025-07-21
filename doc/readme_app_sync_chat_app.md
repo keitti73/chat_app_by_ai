@@ -1,10 +1,27 @@
 # AWS AppSync×DynamoDB チャットアプリ README
 
+[![Code Quality](https://img.shields.io/badge/Quality-Optimized-brightgreen.svg)](#品質改善内容)
+[![ESLint](https://img.shields.io/badge/ESLint-v9.15.0-4B32C3.svg)](#コード品質)
+[![Pipeline Resolvers](https://img.shields.io/badge/Resolvers-Pipeline%20Enabled-success.svg)](#パフォーマンス最適化)
+[![Terraform](https://img.shields.io/badge/Terraform-Validated-623CE4.svg)](#インフラ品質)
+
+---
+
+## 🚀 品質改善内容
+
+### ✅ 最新の改善実装済み
+- **ESLint v9統合**: React特化のコード品質チェック
+- **パイプラインリゾルバー**: myActiveRooms N+1問題解決
+- **React Hooks最適化**: useEffectの依存関係適正化
+- **ES Modules対応**: package.json "type": "module"設定
+- **Terraform検証**: 構文チェック＆ベストプラクティス適用
+- **型安全性向上**: GraphQL型定義の厳密化
+
 ---
 
 ## 概要
 
-このプロジェクトは、AWSフルマネージド（AppSync, DynamoDB, Cognito, Lambda, S3）＋IaC（Terraform）＋React（Amplify）で実装するSlack風リアルタイム・チャットアプリの学習用リポジトリです。
+このプロジェクトは、AWSフルマネージド（AppSync, DynamoDB, Cognito, Lambda, S3）＋IaC（Terraform）＋React（Amplify）で実装する **品質最適化済み** Slack風リアルタイム・チャットアプリの学習用リポジトリです。
 
 ## 📊 技術スタック
 

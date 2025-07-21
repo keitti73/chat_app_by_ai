@@ -30,21 +30,8 @@ export function response(ctx) {
   // ユニークなroomIdのリストを取得
   const uniqueRoomIds = [...new Set(ctx.result.items.map(msg => msg.roomId))];
   
-  // 空の場合は早期リターン
-  if (uniqueRoomIds.length === 0) {
-    return [];
-  }
+  // 次のリゾルバーに渡すためにstashに保存
+  ctx.stash.roomIds = uniqueRoomIds;
   
-  // 注意: この実装は簡易版です。
-  // 実際の本番環境では、パイプラインリゾルバーを使用して
-  // RoomテーブルからRoom情報を適切に取得する必要があります。
-  // 今回は学習目的のため、roomIdの配列を返し、
-  // フロントエンドで個別にルーム情報を取得することを想定します。
-  
-  return uniqueRoomIds.map(roomId => ({
-    id: roomId,
-    name: `Room ${roomId}`, // プレースホルダー
-    owner: "unknown",       // プレースホルダー
-    createdAt: new Date().toISOString() // プレースホルダー
-  }));
+  return uniqueRoomIds;
 }

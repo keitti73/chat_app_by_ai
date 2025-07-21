@@ -6,7 +6,7 @@ import { onRoomCreated } from '../graphql/subscriptions';
 
 const client = generateClient();
 
-export default function MyRooms({ username, onRoomSelect }) {
+export default function MyRooms({ username: _username, onRoomSelect }) {
   const [ownedRooms, setOwnedRooms] = useState([]);
   const [activeRooms, setActiveRooms] = useState([]);
   const [newRoomName, setNewRoomName] = useState('');

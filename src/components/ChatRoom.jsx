@@ -15,6 +15,18 @@ export default function ChatRoom({ roomId, roomName, username, onBack }) {
   useEffect(() => {
     if (!roomId) return;
     
+    const loadMessages = async () => {
+      try {
+        const result = await client.graphql({
+          query: listMessages,
+          variables: { roomId, limit: 100 }
+        });
+        setMessages(result.data.listMessages || []);
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      }
+    };
+
     loadMessages();
     
     // リアルタイムメッセージ受信
@@ -36,18 +48,6 @@ export default function ChatRoom({ roomId, roomName, username, onBack }) {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const loadMessages = async () => {
-    try {
-      const result = await client.graphql({
-        query: listMessages,
-        variables: { roomId, limit: 100 }
-      });
-      setMessages(result.data.listMessages || []);
-    } catch (error) {
-      console.error('Error loading messages:', error);
-    }
-  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();

@@ -11,7 +11,7 @@ resource "aws_cognito_user_pool" "chat_user_pool" {
 
   # ユーザー名の設定（メールアドレスでログインできるようにする）
   alias_attributes = ["email"]
-  
+
   # ユーザー名の大文字小文字を区別しない
   username_configuration {
     case_sensitive = false
@@ -19,24 +19,24 @@ resource "aws_cognito_user_pool" "chat_user_pool" {
 
   # パスワードポリシー（パスワードの強度設定）
   password_policy {
-    minimum_length    = 8           # 最小8文字
-    require_lowercase = true        # 小文字必須
-    require_numbers   = true        # 数字必須
-    require_symbols   = false       # 記号は任意
-    require_uppercase = true        # 大文字必須
+    minimum_length    = 8     # 最小8文字
+    require_lowercase = true  # 小文字必須
+    require_numbers   = true  # 数字必須
+    require_symbols   = false # 記号は任意
+    require_uppercase = true  # 大文字必須
   }
 
   # アカウント復旧設定
   account_recovery_setting {
     recovery_mechanism {
-      name     = "verified_email"   # メールでパスワードリセット
+      name     = "verified_email" # メールでパスワードリセット
       priority = 1
     }
   }
 
   # メール設定
   email_configuration {
-    email_sending_account = "COGNITO_DEFAULT"  # Cognitoのデフォルトメール機能を使用
+    email_sending_account = "COGNITO_DEFAULT" # Cognitoのデフォルトメール機能を使用
   }
 
   # 自動確認設定（メールアドレスを自動確認）
@@ -45,16 +45,16 @@ resource "aws_cognito_user_pool" "chat_user_pool" {
   # ユーザー属性の設定
   schema {
     attribute_data_type = "String"
-    name               = "email"
-    required           = true       # メールアドレスは必須
-    mutable            = true       # 変更可能
+    name                = "email"
+    required            = true # メールアドレスは必須
+    mutable             = true # 変更可能
   }
 
   schema {
     attribute_data_type = "String"
-    name               = "name"
-    required           = true       # 名前は必須
-    mutable            = true       # 変更可能
+    name                = "name"
+    required            = true # 名前は必須
+    mutable             = true # 変更可能
   }
 
   tags = {
@@ -70,15 +70,15 @@ resource "aws_cognito_user_pool_client" "chat_client" {
 
   # 認証フロー設定
   explicit_auth_flows = [
-    "ALLOW_USER_SRP_AUTH",          # SRP認証（安全なパスワード認証）
-    "ALLOW_REFRESH_TOKEN_AUTH",     # リフレッシュトークン認証
-    "ALLOW_USER_PASSWORD_AUTH"      # ユーザー名・パスワード認証
+    "ALLOW_USER_SRP_AUTH",      # SRP認証（安全なパスワード認証）
+    "ALLOW_REFRESH_TOKEN_AUTH", # リフレッシュトークン認証
+    "ALLOW_USER_PASSWORD_AUTH"  # ユーザー名・パスワード認証
   ]
 
   # トークンの有効期限設定
-  access_token_validity  = 60    # アクセストークン60分
-  id_token_validity     = 60    # IDトークン60分
-  refresh_token_validity = 30   # リフレッシュトークン30日
+  access_token_validity  = 60 # アクセストークン60分
+  id_token_validity      = 60 # IDトークン60分
+  refresh_token_validity = 30 # リフレッシュトークン30日
 
   token_validity_units {
     access_token  = "minutes"
@@ -87,13 +87,13 @@ resource "aws_cognito_user_pool_client" "chat_client" {
   }
 
   # セキュリティ設定
-  generate_secret                = false    # クライアントシークレットは使わない（SPAアプリのため）
-  prevent_user_existence_errors  = "ENABLED"  # ユーザー存在確認エラーを防ぐ
-  enable_token_revocation        = true     # トークン無効化を有効
+  generate_secret               = false     # クライアントシークレットは使わない（SPAアプリのため）
+  prevent_user_existence_errors = "ENABLED" # ユーザー存在確認エラーを防ぐ
+  enable_token_revocation       = true      # トークン無効化を有効
 
   # OAuth設定（将来のソーシャルログイン対応用）
   supported_identity_providers = ["COGNITO"]
-  
+
   # 読み書き可能な属性設定
   read_attributes  = ["email", "name"]
   write_attributes = ["email", "name"]
@@ -103,12 +103,12 @@ resource "aws_cognito_user_pool_client" "chat_client" {
 # 認証されたユーザーに一時的なAWS認証情報を提供
 resource "aws_cognito_identity_pool" "chat_identity_pool" {
   identity_pool_name               = "${var.project_name}-identity-pool"
-  allow_unauthenticated_identities = false  # 未認証ユーザーは許可しない
+  allow_unauthenticated_identities = false # 未認証ユーザーは許可しない
 
   # Cognitoユーザープールと連携
   cognito_identity_providers {
     client_id               = aws_cognito_user_pool_client.chat_client.id
-    provider_name          = aws_cognito_user_pool.chat_user_pool.endpoint
+    provider_name           = aws_cognito_user_pool.chat_user_pool.endpoint
     server_side_token_check = false
   }
 
@@ -154,7 +154,7 @@ resource "aws_iam_role_policy" "authenticated_policy" {
       {
         Effect = "Allow"
         Action = [
-          "appsync:GraphQL"  # AppSync GraphQL APIへのアクセス許可
+          "appsync:GraphQL" # AppSync GraphQL APIへのアクセス許可
         ]
         Resource = "${aws_appsync_graphql_api.chat_api.arn}/*"
       }

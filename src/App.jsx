@@ -71,7 +71,7 @@ function App() {
       setCurrentUser(user);
       setIsAuthenticated(true);
       console.log('既存ユーザーでログイン:', user.username);
-    } catch (error) {
+    } catch {
       // ログインしていない場合（エラーは正常）
       console.log('未ログイン状態');
       setIsAuthenticated(false);
@@ -97,8 +97,8 @@ function App() {
       setCurrentView('rooms');  // ルーム一覧に戻す
       setSelectedRoom(null);    // 選択ルームをクリア
       console.log('ログアウト完了');
-    } catch (error) {
-      console.error('ログアウトエラー:', error);
+    } catch (err) {
+      console.error('ログアウトエラー:', err);
     }
   };
 
