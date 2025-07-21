@@ -1,53 +1,53 @@
-# Lambda リゾルバーテンプレート
+# 🤖 Lambda Resolver Template - AI機能統合テンプレート
 
-## 📋 概要
+[![Lambda Integration](https://img.shields.io/badge/lambda-integrated-yellow.svg)](#lambda統合)
+[![AI Ready](https://img.shields.io/badge/AI-ready-purple.svg)](#ai機能対応)
+[![Performance](https://img.shields.io/badge/performance-optimized-blue.svg)](#パフォーマンス最適化)
 
-JavaScript リゾルバーでは実現困難な高度な機能を AWS Lambda で実装するためのテンプレートです。
+このテンプレートは、AWS AppSync で高度なAI機能やLambda統合を実装するためのベストプラクティスを提供します。
 
-## 🎯 Lambda リゾルバーが必要なケース
+---
 
-### ✅ Lambda リゾルバーを使うべき場面
-- 🤖 **外部AIサービス連携** (AWS Comprehend, Rekognition等)
-- 🔄 **複雑な非同期処理制御**
-- 🛡️ **高度なエラーハンドリング**
-- 📊 **バッチ処理とキューイング**
-- 🌐 **サードパーティAPI連携**
-- 🎨 **画像・動画処理**
-- 🔒 **暗号化・セキュリティ処理**
+## 🎯 テンプレートの特徴
 
-### ❌ JavaScript リゾルバーで十分な場面
-- 📝 基本的なCRUD操作
-- 🔄 簡単なデータ変換
-- 📊 DynamoDB直接操作
-- ⚡ 高速なリアルタイム処理
+### ✅ 実装される機能
+- **AI機能統合**: AWS Comprehend、Rekognition、Textract等
+- **複雑な非同期処理**: 並列処理・バッチ処理・外部API連携
+- **エラーハンドリング**: 強固なエラー処理とロールバック機能
+- **パフォーマンス最適化**: キャッシュ・並列実行・タイムアウト制御
+- **セキュリティ**: 入力検証・認証・認可チェック
+- **ファイル分離**: AppSyncリゾルバーとLambda関数の適切な分離
 
-## 🏗️ Lambda リゾルバー基本構造
+### 🏗️ アーキテクチャパターン
 
-### ファイル構成
+```mermaid
+flowchart LR
+    Frontend[React UI] --> AppSync[AppSync GraphQL]
+    AppSync --> JSResolver[JavaScript Resolver]
+    JSResolver --> Lambda[Lambda Function]
+    Lambda --> AI[AWS AI Services]
+    Lambda --> DynamoDB[(DynamoDB)]
+    AI --> Comprehend[Comprehend]
+    AI --> Rekognition[Rekognition]
+    AI --> Textract[Textract]
 ```
-resolvers/
-├── Lambda_functionName.js     # Lambda関数本体
-└── README.md                  # リゾルバー説明
+
+---
+
+## 📁 ファイル構成（改良版）
+
+このテンプレートは以下の2つのファイルで構成されます：
+
+```
+project/
+├── resolvers/
+│   └── Lambda_yourFeature.js          # AppSyncリゾルバー（データ検証・Lambda呼び出し）
+└── lambda/
+    └── yourFeature.js                 # Lambda関数（ビジネスロジック・AI処理）
 ```
 
-### 基本テンプレート
-
-```javascript
-/**
- * AWS AppSync Lambda リゾルバー
- * 機能: [機能説明]
- * 
- * @param {Object} event - AppSync イベント
- * @param {Object} context - Lambda コンテキスト
- * @returns {Object} GraphQL レスポンス
- */
-
-const AWS = require('aws-sdk');
-
-// AWS SDK の設定
-const dynamoDB = new AWS.DynamoDB.DocumentClient({
-  region: process.env.AWS_REGION
-});
+> 🔧 **アーキテクチャ改善**: AppSyncリゾルバーと実際のLambda関数を分離し、
+> それぞれの責任を明確化。メンテナンス性とテスト性が大幅に向上。
 
 // 外部サービスクライアント（例：Comprehend）
 const comprehend = new AWS.Comprehend({

@@ -143,9 +143,9 @@ resource "aws_iam_role_policy" "appsync_dynamodb" {
 }
 
 # 🤖 AppSync Lambda データソース (AI感情分析用)
-resource "aws_appsync_datasource" "lambda_sentiment" {
+resource "aws_appsync_datasource" "lambda_sentiment_analysis" {
   api_id           = aws_appsync_graphql_api.chat_api.id
-  name             = "LambdaSentimentDataSource"
+  name             = "LambdaSentimentAnalysisDataSource"
   service_role_arn = aws_iam_role.appsync_lambda.arn
   type             = "AWS_LAMBDA"
 

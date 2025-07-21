@@ -19,11 +19,15 @@ resolvers/
 ├── Query_myOwnedRooms.js                         # 所有ルーム取得リゾルバー
 ├── Query_listMessages.js                         # メッセージ一覧取得リゾルバー
 ├── Query_getRoom.js                              # ルーム詳細取得リゾルバー
-├── Query_myActiveRooms.js                        # アクティブルーム取得リゾルバー
 ├── Pipeline_myActiveRooms_1_getMessages.js       # 🆕 パイプライン第1段階（メッセージ取得）
 ├── Pipeline_myActiveRooms_2_getRooms.js          # 🆕 パイプライン第2段階（ルーム情報取得）
-└── Lambda_analyzeMessageSentiment.js             # 🤖 AI感情分析Lambdaリゾルバー（🆕）
+└── Lambda_analyzeMessageSentiment.js             # 🤖 AI感情分析AppSyncリゾルバー（🆕）
 ```
+
+> 📝 **ファイル構造の最適化**:
+> - `Query_myActiveRooms.js` は削除（パイプラインリゾルバーに統合）
+> - `Lambda_analyzeMessageSentiment.js` はAppSyncリゾルバー形式に変更
+> - 実際のLambda関数は `/lambda/analyzeMessageSentiment.js` に分離
 
 ## ✨ 新機能・改善点
 

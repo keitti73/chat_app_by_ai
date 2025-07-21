@@ -23,6 +23,9 @@
 - [x] 🎨 **フロントエンドAI統合**: React UIでのリアルタイム感情分析表示 ✅ **完了！**
 - [x] 🔧 **バックエンド統合**: AppSync Lambda Resolver + DynamoDB連携 ✅ **完了！**
 - [x] 📊 **AI分析機能**: 4種類感情分類・25言語対応・コンテンツモデレーション ✅ **完了！**
+- [x] 🏗️ **アーキテクチャ最適化**: Lambda関数分離・Terraform設定最適化 ✅ **完了！**
+- [x] 📦 **Package.json最適化**: ES Modules対応・不要フィールド削除 ✅ **完了！**
+- [x] 📝 **ドキュメント更新**: 全README修正内容反映 ✅ **完了！**
 - [ ] 🔤 **TypeScript導入**: GraphQL Code Generator による型安全性
 - [ ] 🧪 **テスト自動化**: Jest + React Testing Library
 - [ ] 🎭 **E2Eテスト**: Playwright + モックAPI
@@ -117,7 +120,13 @@ type Subscription {
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/keitti73/chat_app_by_ai)
 [![Code Quality](https://img.shields.io/badge/code%20quality-excellent-brightgreen.svg)](#code-quality)
 [![Terraform](https://img.shields.io/badge/terraform-validated-blue.svg)](#terraform-validation)
-[![TypeSc### 🧪 開発効率向上 {#typescript-migration}
+[![TypeScript Ready](https://img.shields.io/badge/typescript-ready-blue.svg)](#typescript-migration)
+[![Production Ready](https://img.shields.io/badge/production-ready-green.svg)](#production-deployment)
+[![Package.json](https://img.shields.io/badge/package.json-optimized-orange.svg)](#package-optimization)
+[![AI Features](https://img.shields.io/badge/AI-integrated-purple.svg)](#ai-integration)
+[![Lambda Functions](https://img.shields.io/badge/lambda-separated-yellow.svg)](#lambda-architecture)
+
+### 🧪 開発効率向上 {#typescript-migration}
 - [x] 🔍 **コード品質**: ESLint導入による継続的品質保証 ✅ **完了！**
 - [x] 📚 **ドキュメント体系化**: テンプレートファイルの機能別分割・スキルレベル別整理 ✅ **完了！**
 - [x] 🤖 **AI機能統合**: Lambda + Comprehend による感情分析システム ✅ **完了！**
@@ -380,7 +389,8 @@ npm run dev
 │   │   ├── GraphQLスキーマ初心者ガイド.md  # GraphQL基礎解説（🆕）
 │   │   ├── GraphQLクエリ実践ガイド.md      # 実装コード実践（🆕）
 │   │   ├── Lambda機能ガイド.md             # 🤖 AI感情分析機能詳細（🆕）
-│   │   └── フロントエンドAI機能ガイド.md    # 🎨 React AI統合ガイド（🆕）
+│   │   ├── フロントエンドAI機能ガイド.md    # 🎨 React AI統合ガイド（🆕）
+│   │   └── デプロイメント動作確認ガイド.md   # デプロイ手順確認
 │   └── templates/                 # � 実装テンプレート集
 │       ├── README.md              # テンプレート使用ガイド・一覧
 │       ├── graphql-schema-template.md       # GraphQLスキーマ設計
@@ -388,6 +398,7 @@ npm run dev
 │       ├── javascript-resolver-basic-template.md      # 基本CRUD操作
 │       ├── javascript-resolver-advanced-template.md   # 高度なクエリ・統計
 │       ├── javascript-resolver-template.md            # 完全版（参考用）
+│       ├── lambda-resolver-template.md                 # 🤖 Lambdaリゾルバパターン（🆕）
 │       ├── react-graphql-template.md                  # GraphQL操作専用
 │       ├── react-components-template.md               # UIコンポーネント専用
 │       ├── react-forms-template.md                    # フォーム処理専用
@@ -423,16 +434,17 @@ npm run dev
 │   ├── Query_getRoom.js              # ルーム情報取得
 │   ├── Query_listMessages.js         # メッセージ一覧取得
 │   ├── Query_myOwnedRooms.js         # 自分のルーム一覧
-│   ├── Query_myActiveRooms.js        # アクティブルーム複合クエリ
 │   ├── Pipeline_myActiveRooms_1_getMessages.js  # パイプライン1段目
 │   ├── Pipeline_myActiveRooms_2_getRooms.js     # パイプライン2段目
-│   └── Lambda_analyzeMessageSentiment.js        # 🤖 AI感情分析処理（🆕）
+│   └── Lambda_analyzeMessageSentiment.js        # 🤖 AI感情分析AppSyncリゾルバー（🆕）
+├── lambda/                        # 🤖 Lambda関数実装（🆕）
+│   └── analyzeMessageSentiment.js   # AI感情分析Lambda関数
 ├── public/                        # 🌐 静的ファイル（アイコン等）
 ├── schema.graphql                 # 📝 データの設計図（GraphQLスキーマ）
 ├── deploy.sh                      # 🚀 自動デプロイスクリプト
 ├── eslint.config.js              # 🔍 コード品質チェック設定
 ├── vite.config.js                # ⚡ 開発用ツールの設定
-├── package.json                   # 📦 プロジェクト依存関係（ES Modules対応）
+├── package.json                   # 📦 プロジェクト依存関係（ES Modules対応・最適化済み）
 ├── index.html                     # 🌐 アプリのメインHTMLファイル
 └── README.md                      # 📖 このファイル（プロジェクト概要）
 ```

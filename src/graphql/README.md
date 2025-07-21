@@ -13,10 +13,11 @@
 ### ✅ 実装済み改善
 - **パイプラインリゾルバー連携**: myActiveRooms最適化対応
 - **AI感情分析統合**: AWS Comprehend Lambda リゾルバー
-- **ES Modules対応**: package.json "type": "module"設定
+- **ES Modules対応**: package.json "type": "module"設定最適化
 - **型安全性向上**: GraphQL型定義の厳密化
 - **パフォーマンス最適化**: N+1問題解決
 - **エラーハンドリング強化**: robust error handling
+- **ファイル構造最適化**: AppSyncリゾルバーとLambda関数の分離
 
 ---
 

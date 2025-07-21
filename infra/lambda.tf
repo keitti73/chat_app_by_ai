@@ -128,7 +128,7 @@ resource "aws_dynamodb_table" "sentiment_analysis" {
 # Lambda関数のZIPファイル作成
 data "archive_file" "lambda_sentiment_analysis_zip" {
   type        = "zip"
-  source_file = "${path.module}/../resolvers/Lambda_analyzeMessageSentiment.js"
+  source_file = "${path.module}/../lambda/analyzeMessageSentiment.js"
   output_path = "${path.module}/lambda_sentiment_analysis.zip"
 }
 
@@ -137,7 +137,7 @@ resource "aws_lambda_function" "sentiment_analysis" {
   filename         = data.archive_file.lambda_sentiment_analysis_zip.output_path
   function_name    = "${var.project_name}-sentiment-analysis"
   role            = aws_iam_role.lambda_sentiment_analysis_role.arn
-  handler         = "Lambda_analyzeMessageSentiment.handler"
+  handler         = "analyzeMessageSentiment.handler"
   runtime         = "nodejs18.x"
   timeout         = 30
   memory_size     = 256
@@ -217,49 +217,6 @@ resource "aws_iam_role_policy" "appsync_lambda_policy" {
       }
     ]
   })
-}
-
-# AppSync Lambda データソース
-resource "aws_appsync_datasource" "lambda_sentiment_analysis" {
-  api_id           = aws_appsync_graphql_api.chat_api.id
-  name             = "LambdaSentimentAnalysisDataSource"
-  type             = "AWS_LAMBDA"
-  service_role_arn = aws_iam_role.appsync_lambda_role.arn
-
-  lambda_config {
-    function_arn = aws_lambda_function.sentiment_analysis.arn
-  }
-}
-
-# AppSync Lambda リゾルバー
-resource "aws_appsync_resolver" "analyze_message_sentiment" {
-  api_id      = aws_appsync_graphql_api.chat_api.id
-  type        = "Query"
-  field       = "analyzeMessageSentiment"
-  data_source = aws_appsync_datasource.lambda_sentiment_analysis.name
-
-  # Lambda呼び出し用のリクエストマッピング
-  request_template = <<EOF
-{
-  "version": "2017-02-28",
-  "operation": "Invoke",
-  "payload": {
-    "arguments": $util.toJson($context.arguments),
-    "identity": $util.toJson($context.identity),
-    "source": $util.toJson($context.source),
-    "request": $util.toJson($context.request)
-  }
-}
-EOF
-
-  # Lambdaレスポンス用のレスポンスマッピング
-  response_template = <<EOF
-#if($context.error)
-  $util.error($context.error.message, $context.error.type)
-#else
-  $util.toJson($context.result)
-#end
-EOF
 }
 
 # CloudWatch Logs for Lambda

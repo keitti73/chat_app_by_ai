@@ -16,6 +16,8 @@
 - **TypeScript対応準備**: 型安全性向上の基盤整備
 - **パフォーマンス最適化**: 不要な再レンダリング防止
 - **コード標準化**: 一貫したコーディングスタイル
+- **AI機能統合**: リアルタイム感情分析UI実装
+- **Cognito認証統合**: 安全なユーザー認証システム
 
 ---
 
@@ -62,6 +64,9 @@ flowchart TD
 - メッセージ送信機能
 - メッセージ履歴取得
 - WebSocketベースのリアルタイム通信
+- 🤖 AI感情分析機能（リアルタイム感情スコア表示）
+- 🌍 多言語対応（自動言語検出）
+- 🛡️ コンテンツ安全性チェック
 
 #### 📡 **使用するGraphQL操作**
 ```javascript
@@ -71,12 +76,16 @@ import { listMessages } from '../graphql/queries';
 import { postMessage } from '../graphql/mutations';
 // リアルタイム購読
 import { onMessagePosted } from '../graphql/subscriptions';
+// 🤖 AI感情分析
+import { analyzeMessageSentimentMutation } from '../graphql/mutations';
 ```
 
 #### 🔄 **状態管理**
 ```javascript
 const [messages, setMessages] = useState([]);     // メッセージ一覧
 const [newMessage, setNewMessage] = useState(''); // 入力中メッセージ
+const [sentimentAnalysis, setSentimentAnalysis] = useState({}); // 🤖 AI分析結果
+const [analyzingMessages, setAnalyzingMessages] = useState(new Set()); // 分析中状態
 ```
 
 #### 🎣 **主要なフック使用パターン**

@@ -124,7 +124,7 @@ resource "aws_appsync_resolver" "analyze_message_sentiment" {
   api_id      = aws_appsync_graphql_api.chat_api.id
   field       = "analyzeMessageSentiment"
   type        = "Mutation"
-  data_source = aws_appsync_datasource.lambda_sentiment.name
+  data_source = aws_appsync_datasource.lambda_sentiment_analysis.name
 
   runtime {
     name            = "APPSYNC_JS"
