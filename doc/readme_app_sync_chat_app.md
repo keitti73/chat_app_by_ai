@@ -659,8 +659,4 @@ export default function ChatRoom({ roomId, username }) {
   );
 }
 ```
-
 ---
-
-## 🏗️ システムアーキテクチャ
-
